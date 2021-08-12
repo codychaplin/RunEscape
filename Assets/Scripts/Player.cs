@@ -4,8 +4,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class Player : MonoBehaviour
 {
-    public Interactable focus;
-    public LayerMask excludeMask;
+    public Interactable focus; // focusable object
+    public LayerMask excludeMask; // raycast mask
 
     Camera cam;
     NavMeshAgent agent;
@@ -26,10 +26,11 @@ public class Player : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 100))
+            if (Physics.Raycast(ray, out hit, 100, ~excludeMask)) // if raycast is successfull
             {
+                // snap to grid and move to point
                 MoveToPoint(new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z)));
-                RemoveFocus();
+                RemoveFocus(); // remove focus, if any
             }
         }
 
@@ -40,37 +41,37 @@ public class Player : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 100))
             {
-                // if focus is interactable, set focus
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
-                if (interactable != null)
+                
+                if (interactable != null) // if focus is interactable, set focus
                     SetFocus(interactable);
             }
         }
 
-        if (target != null)
+        if (target != null) // if focused
         {
-            agent.SetDestination(target.position);
-            FaceTarget();
+            agent.SetDestination(target.position); // go to target position
+            FaceTarget(); // align body with target direction
         }
     }
 
     void MoveToPoint(Vector3Int point)
     {
-        agent.SetDestination(point);
+        agent.SetDestination(point); // go to destination
     }
 
     void FollowTarget(Interactable newTarget)
     {
-        agent.stoppingDistance = newTarget.radius;
-        agent.updateRotation = false;
-        target = newTarget.interactionTransform;
+        agent.stoppingDistance = newTarget.radius; // sets stopping distance
+        agent.updateRotation = false; // do not update rotation
+        target = newTarget.interactionTransform; // target is target's transform
     }
 
     void UnFollowTarget()
     {
-        agent.stoppingDistance = 0f;
-        agent.updateRotation = true;
-        target = null;
+        agent.stoppingDistance = 0f; // reset stopping distance
+        agent.updateRotation = true; // update rotation
+        target = null; // remove target
     }
 
     void FaceTarget()
@@ -82,24 +83,24 @@ public class Player : MonoBehaviour
 
     void SetFocus(Interactable newFocus)
     {
-        if (newFocus != focus)
+        if (newFocus != focus) // if focus is different from current focus
         {
-            if (focus != null)
+            if (focus != null) // if focused on something else
                 focus.OnDefocused();
 
-            focus = newFocus;
-            FollowTarget(newFocus);
+            focus = newFocus; // sets new focus
+            FollowTarget(newFocus); // sets target to follow
         }
 
-        newFocus.OnFocused(transform);
+        newFocus.OnFocused(transform); // provides player's transform
     }
 
     void RemoveFocus()
     {
-        if (focus != null)
+        if (focus != null) // if focused, defocus
             focus.OnDefocused();
 
-        focus = null;
+        focus = null; // remove focus
         UnFollowTarget();
     }
 }

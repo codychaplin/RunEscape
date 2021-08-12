@@ -18,19 +18,25 @@ public class Interactable : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isFocus && !hasInteracted)
+        if (isFocus && !hasInteracted) // if focused but has not interacted yet
         {
+            // get distance to focused object
             float distance = Vector3.Distance(player.position, interactionTransform.position);
-            if (distance <= radius)
+
+            if (distance <= radius) // if within range
             {
-                Interact();
+                Interact(); // base interact function
                 hasInteracted = true;
             }
         }
     }
 
+    // debuging purposes
     private void OnDrawGizmosSelected()
     {
+        if (interactionTransform == null)
+            interactionTransform = transform;
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(interactionTransform.position, radius);
     }
@@ -43,14 +49,14 @@ public class Interactable : MonoBehaviour
     public void OnFocused(Transform playerTransform)
     {
         isFocus = true;
-        player = playerTransform;
+        player = playerTransform; // gets player position
         hasInteracted = false;
     }
 
     public void OnDefocused()
     {
         isFocus = false;
-        player = null;
+        player = null; // removes player transform from player
         hasInteracted = false;
     }
 }
