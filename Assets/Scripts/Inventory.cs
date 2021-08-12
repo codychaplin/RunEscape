@@ -29,7 +29,9 @@ public class Inventory : MonoBehaviour
             }
             
             items.Add(item); // add item to inventory
-            onItemChangedCallback.Invoke(); // trigger event
+
+            if (onItemChangedCallback != null)
+                onItemChangedCallback.Invoke(); // trigger event
         }
 
         return true; // if true, destroy gameobject
@@ -38,5 +40,8 @@ public class Inventory : MonoBehaviour
     public void Remove(Item item)
     {
         items.Remove(item); // remove item from list
+
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke(); // trigger event
     }
 }
