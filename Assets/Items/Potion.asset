@@ -9,12 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a273e8cf1af29904983ce27aa6bfcf35, type: 3}
-  m_Name: Helmet
+  m_Script: {fileID: 11500000, guid: 03446c3d050698543ace1010c37f9155, type: 3}
+  m_Name: Potion
   m_EditorClassIdentifier: 
-  name: Helmet
+  name: Potion
   icon: {fileID: 0}
   isDefaultItem: 0
-  equipmentSlot: 0
-  armourModifier: 0
-  damageModifier: 0
