@@ -3,26 +3,13 @@ using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour
 {
+    public Item item { get; private set; }
     public Image icon;
-
-    Item item;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void AddItem(Item newItem)
     {
         item = newItem;
-        icon.sprite = item.icon;
+        icon.sprite = newItem.icon;
         icon.enabled = true;
     }
 

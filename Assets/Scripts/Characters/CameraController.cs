@@ -6,7 +6,7 @@ public class CameraController : MonoBehaviour
     public Vector3 offset;
 
     // zoom
-    float zoom = 8f;
+    float zoom = 3f;
     public float zoomSpeed = 4f;
     public float minZoom = 2f;
     public float maxZoom = 12f;

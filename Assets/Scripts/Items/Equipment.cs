@@ -4,6 +4,8 @@
 public class Equipment : Item
 {
     public EquipmentSlot equipmentSlot;
+    public SkinnedMeshRenderer mesh;
+    public EquipmentMeshRegion[] coveredRegions;
     public int armourModifier;
     public int damageModifier;
 
@@ -15,4 +17,6 @@ public class Equipment : Item
     }
 }
 
-public enum EquipmentSlot { Head, Chest, Legs, Boots, Weapon, Shield }
+public enum EquipmentSlot { Head, Chest, Legs, Boots, Weapon, Shield } // slot type
+
+public enum EquipmentMeshRegion { Legs, Torso, Arms }; // used for blendshapes

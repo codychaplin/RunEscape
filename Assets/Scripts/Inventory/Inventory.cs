@@ -15,20 +15,29 @@ public class Inventory : MonoBehaviour
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback; // inventory event
 
-    public List<Item> items = new List<Item>(); // inventory list
-    public int size = 28; // inventory size
+    const int size = 28; // inventory size
+    public Item[] items = new Item[size]; // inventory array
+
+    int itemCount = 0; // current item count
 
     public bool Add(Item item)
     {
         if (!item.isDefaultItem) // if item is not a default item
         {
-            if (items.Count >= size) // if inventory is full
+            if (itemCount >= size) // if inventory is full
             {
                 Debug.Log("Inventory full");
                 return false; // if false, don't destroy game object
             }
-            
-            items.Add(item); // add item to inventory
+
+            for (int i = 0; i < items.Length; i++)
+                if (items[i] == null)
+                {
+                    Debug.Log("Added " + item.name + " at index " + i);
+                    items[i] = item; // add item to inventory slot
+                    itemCount++;
+                    break; // breaks at first empty slot
+                }
 
             if (onItemChangedCallback != null)
                 onItemChangedCallback.Invoke(); // trigger event
@@ -39,9 +48,16 @@ public class Inventory : MonoBehaviour
 
     public void Remove(Item item)
     {
-        Debug.Log("Removed " + item.name);
-
-        items.Remove(item); // remove item from list
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == item)
+            {
+                Debug.Log("Removed " + item.name + " at index " + i);
+                items[i] = null; // remove item from list
+                itemCount--;
+                break; // break once found
+            }
+        }
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke(); // trigger event

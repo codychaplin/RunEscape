@@ -13,7 +13,7 @@ public class InventoryUI : MonoBehaviour
     void Start()
     {
         inventory = Inventory.instance;
-        inventory.onItemChangedCallback += UpdateUI;
+        inventory.onItemChangedCallback += UpdateUI; // UI update is subscribed to item change event
 
         slots = invPanel.GetComponentsInChildren<InventorySlot>();
     }
@@ -31,10 +31,9 @@ public class InventoryUI : MonoBehaviour
     {
         for (int i = 0; i < slots.Length; i++)
         {
-            if (i < inventory.items.Count)
-            {
+            // if item is at index, update UI slot, else clear slot
+            if (inventory.items[i] != null)
                 slots[i].AddItem(inventory.items[i]);
-            }
             else
                 slots[i].ClearSlot();
         }

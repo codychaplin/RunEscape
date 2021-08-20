@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Platebody
   m_EditorClassIdentifier: 
   name: Platebody
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 79e56d74c838956459e0f5b4a196391c, type: 3}
   isDefaultItem: 0
   equipmentSlot: 1
+  mesh: {fileID: 7181206228079588184, guid: 314b2204d3c01a04d87e9829bebc9c5b, type: 3}
+  coveredRegions: 0100000002000000
   armourModifier: 0
   damageModifier: 0

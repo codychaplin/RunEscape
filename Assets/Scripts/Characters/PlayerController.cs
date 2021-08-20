@@ -3,7 +3,7 @@ using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class Player : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public Interactable focus; // focusable object
     public LayerMask excludeMask; // raycast mask
@@ -45,7 +45,7 @@ public class Player : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 100))
+            if (Physics.Raycast(ray, out hit, 100, ~excludeMask))
             {
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
                 

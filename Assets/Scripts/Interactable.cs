@@ -43,7 +43,7 @@ public class Interactable : MonoBehaviour
 
     public virtual void Interact()
     {
-        Debug.Log("interacting with " + transform.name);
+        
     }
 
     public void OnFocused(Transform playerTransform)
