@@ -70,7 +70,7 @@ public class PlayerController : MonoBehaviour
     {
         agent.stoppingDistance = newTarget.radius; // sets stopping distance
         agent.updateRotation = false; // do not update rotation
-        target = newTarget.interactionTransform; // target is target's transform
+        target = newTarget.transform; // target is target's transform
     }
 
     void UnFollowTarget()
@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
     void FaceTarget()
     {
         Vector3 direction = (target.position - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0f, direction.z));
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x + 0.001f, 0f, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
     }
 

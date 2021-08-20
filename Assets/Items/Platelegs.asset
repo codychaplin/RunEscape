@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Platelegs
   icon: {fileID: 21300000, guid: e873ca0fb02f54a46a916267d7b3df51, type: 3}
+  canStack: 0
   isDefaultItem: 0
+  prefab: {fileID: 6640962144745848731, guid: 0592a7036bb9fb846b4c34b41685bbb4, type: 3}
   equipmentSlot: 2
   mesh: {fileID: 4403696795304258827, guid: 951f7fe81842ac34a9bce59070a166dc, type: 3}
   coveredRegions: 00000000
-  armourModifier: 0
+  armourModifier: 1
   damageModifier: 0

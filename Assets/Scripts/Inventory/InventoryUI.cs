@@ -16,6 +16,10 @@ public class InventoryUI : MonoBehaviour
         inventory.onItemChangedCallback += UpdateUI; // UI update is subscribed to item change event
 
         slots = invPanel.GetComponentsInChildren<InventorySlot>();
+        for (int i = 0; i < slots.Length; i++)
+        {
+            slots[i].index = i;
+        }
     }
 
     // Update is called once per frame

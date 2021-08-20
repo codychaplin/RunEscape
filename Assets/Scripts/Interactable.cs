@@ -2,8 +2,7 @@
 
 public class Interactable : MonoBehaviour
 {
-    public float radius = 2f;
-    public Transform interactionTransform;
+    public float radius = 0.5f;
 
     Transform player;
     bool isFocus = false;
@@ -21,7 +20,7 @@ public class Interactable : MonoBehaviour
         if (isFocus && !hasInteracted) // if focused but has not interacted yet
         {
             // get distance to focused object
-            float distance = Vector3.Distance(player.position, interactionTransform.position);
+            float distance = Vector3.Distance(player.position, transform.position);
 
             if (distance <= radius) // if within range
             {
@@ -34,11 +33,8 @@ public class Interactable : MonoBehaviour
     // debuging purposes
     private void OnDrawGizmosSelected()
     {
-        if (interactionTransform == null)
-            interactionTransform = transform;
-
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(interactionTransform.position, radius);
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 
     public virtual void Interact()

@@ -46,6 +46,33 @@ public class Inventory : MonoBehaviour
         return true; // if true, destroy gameobject
     }
 
+    public bool Swap(Item item, int oldIndex, int newIndex)
+    {
+        if (!item.isDefaultItem) // if item is not a default item
+        {
+            if (items[newIndex] == null)
+            {
+                Debug.Log("Added " + item.name + " at index " + newIndex);
+                Remove(items[oldIndex]); // removes old item;
+                items[newIndex] = item; // add item to inventory slot
+                itemCount++;
+            }
+            else if (items[newIndex] != null)
+            {
+                Debug.Log("Swapped items at index " + oldIndex + " and " + newIndex);
+                // swaps items at indicies
+                Item tempItem = items[newIndex];
+                items[newIndex] = items[oldIndex];
+                items[oldIndex] = tempItem;
+            }
+
+            if (onItemChangedCallback != null)
+                onItemChangedCallback.Invoke(); // trigger event
+        }
+
+        return true; // if true, destroy gameobject
+    }
+
     public void Remove(Item item)
     {
         for (int i = 0; i < items.Length; i++)

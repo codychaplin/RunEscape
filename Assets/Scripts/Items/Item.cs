@@ -7,6 +7,7 @@ public class Item : ScriptableObject
     public Sprite icon = null;
     public bool canStack = false;
     public bool isDefaultItem = false;
+    public Transform prefab;
 
     public virtual void Use()
     {

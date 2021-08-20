@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Sword
   icon: {fileID: 21300000, guid: acab0ca8760b55d408dd4ad4f5e38cf8, type: 3}
+  canStack: 0
   isDefaultItem: 0
+  prefab: {fileID: 2901686002239339388, guid: 9cc3107a47e174341b0d3729ae6ba6ed, type: 3}
   equipmentSlot: 4
   mesh: {fileID: 1456236685882603585, guid: 1688e60ab7f801844aa08cc8504c1bf0, type: 3}
   coveredRegions: 
