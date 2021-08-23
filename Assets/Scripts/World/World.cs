@@ -1,14 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class EnemyStats : CharacterStats
+public class World : MonoBehaviour
 {
-    public override void Die()
-    {
-        base.Die();
-
-        Destroy(gameObject, 1f);
-    }
-
     // Start is called before the first frame update
     void Start()
     {

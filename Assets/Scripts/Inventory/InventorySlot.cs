@@ -57,15 +57,18 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         GameObject parent = new GameObject();
         parent.transform.SetParent(GameObject.FindGameObjectWithTag("Drops").transform);
         parent.name = item.name + "Pickup";
-        parent.AddComponent<BoxCollider>();
-        parent.AddComponent<ItemPickup>();
+        parent.AddComponent<BoxCollider>(); // adds box collider
+        parent.AddComponent<ItemPickup>(); // adds itemPickup script
 
+        BoxCollider boxCollider = parent.GetComponent<BoxCollider>();
+        boxCollider.size = new Vector3(boxCollider.size.x, 0.01f, boxCollider.size.z); // sets the box collider size
         ItemPickup pickup = parent.GetComponent<ItemPickup>();
-        pickup.item = item;
+        pickup.item = item; // sets the item to the item in the inventory slot
 
-        parent.transform.position = PlayerManager.instance.player.transform.position;
-        parent.transform.position = new Vector3(parent.transform.position.x, 0f, parent.transform.position.z);
+        parent.transform.position = PlayerManager.instance.player.transform.position; // sets the position to the players position
+        parent.transform.position = new Vector3(Mathf.RoundToInt(
+            parent.transform.position.x), 0f, Mathf.RoundToInt(parent.transform.position.z)); // sets y to 0 and rounds position to int
 
-        Instantiate(item.prefab, parent.transform);
+        Instantiate(item.prefab, parent.transform); // instantiates prefab
     }
 }
