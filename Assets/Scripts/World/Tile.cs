@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    // coordinates
-    Vector3Int location;
-
     // properties
-    bool isWalkable;
+    bool canWalk;
 
 }

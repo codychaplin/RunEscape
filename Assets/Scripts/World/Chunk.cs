@@ -17,9 +17,8 @@ public class Chunk
     public MeshCollider meshCollider;
 
     // used to store vertices and such for an individual voxel
-    int vertexIndex = 0;
-    List<Vector3> vertices = new List<Vector3>();
-    List<int> triangles = new List<int>();
+    Vector3[] vertices = new Vector3[(Voxel.ChunkWidth + 1) * (Voxel.ChunkWidth + 1)];
+    int[] triangles = new int[Voxel.ChunkWidth * Voxel.ChunkWidth * 6];
     List<Vector2> uvs = new List<Vector2>();
 
     public Chunk(int _x, int _z, World _world)
@@ -37,48 +36,51 @@ public class Chunk
         chunk.name = "Chunk " + x + "," + z; // gives chunk corresponding name
 
         CreateChunk();
-        CreateMesh();
     }
 
     void CreateChunk()
     {
-        ClearMesh(); // clears any mesh data before creating new data
+        // creates vertices for chunk
+        for (int z = 0, i = 0; z < Voxel.ChunkWidth; z++)
+            for (int x = 0; x < Voxel.ChunkWidth; x++)
+            {
+                vertices[i] = (new Vector3Int(x, 0, z));
+                i++;
+            }
 
-        for (int x = 0; x < Voxel.ChunkWidth; x++)
-            for (int z = 0; z < Voxel.ChunkWidth; z++)
-                CreateTile(new Vector3Int(x, 0, z)); // creates block
+        // increment variables
+        int vert = 0;
+        int tris = 0;
 
+        // creates triangles for chunk
+        for (int z = 0; z < Voxel.ChunkWidth - 1; z++)
+        {
+            for (int x = 0; x < Voxel.ChunkWidth - 1; x++)
+            {
+                triangles[tris + 0] = vert + 0;
+                triangles[tris + 1] = vert + Voxel.ChunkWidth;
+                triangles[tris + 2] = vert + 1;
+                triangles[tris + 3] = vert + 1;
+                triangles[tris + 4] = vert + Voxel.ChunkWidth;
+                triangles[tris + 5] = vert + Voxel.ChunkWidth + 1;
+
+                vert++; // increments to next square
+                tris += 6; // increments to next set of triangles
+            }
+
+            vert++; // used so last vert in row doesn't try to connect to first vert in next row
+        }
+        
         CreateMesh(); // adds information needed to render faces
-    }
-
-    void CreateTile(Vector3Int pos)
-    {
-        // adds vertices
-        vertices.Add(pos + Voxel.voxelVerts[Voxel.voxelTris[0]]);
-        vertices.Add(pos + Voxel.voxelVerts[Voxel.voxelTris[1]]);
-        vertices.Add(pos + Voxel.voxelVerts[Voxel.voxelTris[2]]);
-        vertices.Add(pos + Voxel.voxelVerts[Voxel.voxelTris[3]]);
-
-        AddTexture();
-
-        // adds UVs
-        triangles.Add(vertexIndex);
-        triangles.Add(vertexIndex + 1);
-        triangles.Add(vertexIndex + 2);
-        triangles.Add(vertexIndex + 2);
-        triangles.Add(vertexIndex + 1);
-        triangles.Add(vertexIndex + 3);
-
-        vertexIndex += 4;
     }
 
     // RESPONSIBLE FOR CREATING MESHES USED TO RENDER FACES
     void CreateMesh()
     {
         Mesh mesh = new Mesh(); // creates new mesh object
-        mesh.vertices = vertices.ToArray(); // vertex positions from list get set as positions for mesh vertices
-        mesh.triangles = triangles.ToArray();
-        mesh.uv = uvs.ToArray(); // adds UVs to mesh
+        mesh.vertices = vertices; // vertex positions from list get set as positions for mesh vertices
+        mesh.triangles = triangles;
+        //mesh.uv = uvs.ToArray(); // adds UVs to mesh
         mesh.RecalculateNormals(); // calculates normal (direction) of face
         meshFilter.mesh = mesh; // sets mesh to mesh filter
         meshCollider.sharedMesh = meshFilter.mesh; // adds collider to chunk
@@ -90,14 +92,5 @@ public class Chunk
         uvs.Add(Voxel.voxelUVs[1]);
         uvs.Add(Voxel.voxelUVs[2]);
         uvs.Add(Voxel.voxelUVs[3]);
-    }
-
-    // clears all mesh data
-    void ClearMesh()
-    {
-        vertexIndex = 0;
-        vertices.Clear();
-        triangles.Clear();
-        uvs.Clear();
     }
 }
