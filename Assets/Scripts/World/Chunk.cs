@@ -32,8 +32,9 @@ public class Chunk
         meshCollider = chunk.AddComponent<MeshCollider>();
         meshRenderer.material = world.material;
 
-        chunk.transform.SetParent(world.transform); // puts chunk game objects under world parent
         chunk.name = "Chunk " + x + "," + z; // gives chunk corresponding name
+        chunk.transform.SetParent(world.transform); // puts chunk game objects under world parent
+        chunk.transform.position = new Vector3(x * Voxel.ChunkWidth, 0f, z * Voxel.ChunkWidth); // sets chunk positions
 
         CreateChunk();
     }
@@ -41,8 +42,8 @@ public class Chunk
     void CreateChunk()
     {
         // creates vertices for chunk
-        for (int z = 0, i = 0; z < Voxel.ChunkWidth; z++)
-            for (int x = 0; x < Voxel.ChunkWidth; x++)
+        for (int z = 0, i = 0; z < Voxel.ChunkWidth + 1; z++)
+            for (int x = 0; x < Voxel.ChunkWidth + 1; x++)
             {
                 vertices[i] = (new Vector3Int(x, 0, z));
                 i++;
@@ -53,16 +54,16 @@ public class Chunk
         int tris = 0;
 
         // creates triangles for chunk
-        for (int z = 0; z < Voxel.ChunkWidth - 1; z++)
+        for (int z = 0; z < Voxel.ChunkWidth; z++)
         {
-            for (int x = 0; x < Voxel.ChunkWidth - 1; x++)
+            for (int x = 0; x < Voxel.ChunkWidth; x++)
             {
                 triangles[tris + 0] = vert + 0;
-                triangles[tris + 1] = vert + Voxel.ChunkWidth;
+                triangles[tris + 1] = vert + Voxel.ChunkWidth + 1;
                 triangles[tris + 2] = vert + 1;
                 triangles[tris + 3] = vert + 1;
-                triangles[tris + 4] = vert + Voxel.ChunkWidth;
-                triangles[tris + 5] = vert + Voxel.ChunkWidth + 1;
+                triangles[tris + 4] = vert + Voxel.ChunkWidth + 1;
+                triangles[tris + 5] = vert + Voxel.ChunkWidth + 2;
 
                 vert++; // increments to next square
                 tris += 6; // increments to next set of triangles
@@ -84,13 +85,5 @@ public class Chunk
         mesh.RecalculateNormals(); // calculates normal (direction) of face
         meshFilter.mesh = mesh; // sets mesh to mesh filter
         meshCollider.sharedMesh = meshFilter.mesh; // adds collider to chunk
-    }
-
-    void AddTexture()
-    {
-        uvs.Add(Voxel.voxelUVs[0]);
-        uvs.Add(Voxel.voxelUVs[1]);
-        uvs.Add(Voxel.voxelUVs[2]);
-        uvs.Add(Voxel.voxelUVs[3]);
     }
 }

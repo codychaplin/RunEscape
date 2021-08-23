@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 100, ~excludeMask)) // if raycast is successfull
+            if (Physics.Raycast(ray, out hit, 1000, ~excludeMask)) // if raycast is successfull
             {
                 // snap to grid and move to point
                 MoveToPoint(new Vector3Int(Mathf.RoundToInt(hit.point.x), Mathf.RoundToInt(hit.point.y), Mathf.RoundToInt(hit.point.z)));
@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit, 100, ~excludeMask))
+            if (Physics.Raycast(ray, out hit, 1000, ~excludeMask))
             {
                 Interactable interactable = hit.collider.GetComponent<Interactable>();
                 

@@ -5,7 +5,7 @@ public static class Voxel
     // chunk width
     public static readonly int ChunkWidth = 16;
     //defined world width/length in chunks
-    public static readonly int WorldSizeInChunks = 4;
+    public static readonly int WorldSizeInChunks = 2;
 
     // used to get the world size in voxels, given size of world in chunks
     public static int WorldSizeInBlocks
