@@ -1,10 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Tile : MonoBehaviour
+public class Tile
 {
     // properties
-    bool canWalk;
+    public Vector3 pos { get; private set; }
 
+    public bool canWalk { get; private set; }
+
+    public Tile()
+    {
+
+    }
+
+    public Tile(Vector3 _pos, bool _canWalk)
+    {
+        pos = _pos;
+        canWalk = _canWalk;
+    }
 }
