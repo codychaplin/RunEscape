@@ -66,8 +66,8 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         pickup.item = item; // sets the item to the item in the inventory slot
 
         parent.transform.position = PlayerManager.instance.player.transform.position; // sets the position to the players position
-        parent.transform.position = new Vector3(Mathf.RoundToInt(
-            parent.transform.position.x), 0f, Mathf.RoundToInt(parent.transform.position.z)); // sets y to 0 and rounds position to int
+        parent.transform.position = new Vector3(Mathf.FloorToInt(
+            parent.transform.position.x) + 0.5f, 0f, Mathf.FloorToInt(parent.transform.position.z) + 0.5f); // sets y to 0 and rounds position to int
 
         Instantiate(item.prefab, parent.transform); // instantiates prefab
     }
