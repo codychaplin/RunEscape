@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System.IO;
 
 public class World : MonoBehaviour
@@ -10,7 +8,7 @@ public class World : MonoBehaviour
     public Material material;
 
     public static readonly int ChunkWidth = 16;
-    public static readonly int WorldSizeInChunks = 1;
+    public static readonly int WorldSizeInChunks = 2;
 
     // used to get the world size in tiles, given size of world in chunks
     public static int WorldSizeInTiles
@@ -83,13 +81,13 @@ public class World : MonoBehaviour
             string row = textIn.ReadLine();
             string[] column = row.Split('|');
 
-            for (int j = 0; j < column.Length; j++)
+            for (int j = 0; j < column.Length - 1; j++)
             {
                 string[] vector = column[j].Split(',');
 
                 // swap y and z when importing from Blender
                 Vector3Int pos = new Vector3Int(int.Parse(vector[0]), int.Parse(vector[2]), int.Parse(vector[1]));
-                Tile tile = new Tile(pos);
+                Tile tile = new Tile(pos, true);
                 tileMap[i, j] = tile;
             }
 

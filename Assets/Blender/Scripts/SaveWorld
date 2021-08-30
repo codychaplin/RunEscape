@@ -1,0 +1,50 @@
+import bpy
+import math
+import numpy as np
+
+path = bpy.path.abspath("//") # project path
+text = open(path + "..\WorldData\Vertices.txt", "w") # file path
+col = bpy.data.collections['World'] # collection named "World"
+chunks = col.objects # list of chunks (children of World)
+dim = int(math.sqrt(len(chunks))) # gets the length of 1 dimension of list
+chunkArray = np.array(chunks).reshape(dim, dim) # converts list to 2D array
+n = '\n'
+
+for index in range(0, 2): # column index
+    for row in range(0, 16): # row index
+        for chunk in chunkArray[index]: # chunk
+            verts = np.array(chunk.data.vertices).reshape(17,17) # 2D vertex array
+            for vertColumn in range(0, 16): # column index
+                coords = chunk.matrix_world @ verts[row][vertColumn].co # vertex location
+                for c in coords[:-1]: # x, y, z coords
+                    text.write(str(int(c)) + ",")
+                text.write(str(int(coords[-1])) + "|")
+        text.write(n)
+
+#for y in range(0, dim):
+#        obj = chunkArray[0,y]
+#        print(obj)
+#        verts = obj.data.vertices
+#        for v in verts[:16]:
+#            c = obj.matrix_world @ v.co
+#            print(c)
+
+#for v in verts[:-17]:
+#    if isLast == False:
+#        coords = obj.matrix_world @ v.co
+#        #coords = v.co
+#        
+#        for c in coords[:-1]:
+#            text.write(str(int(c)) + ",")
+#            
+#        if i == 15:
+#            text.write(str(int(coords[-1])) + '\n')
+#            i = 0
+#            isLast = True
+#        else:
+#            text.write(str(int(coords[-1])) + "|")
+#            i += 1
+#    else:
+#        isLast = False
+    
+text.close()

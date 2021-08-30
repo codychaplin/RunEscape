@@ -140,9 +140,11 @@ public class Pathfinding
             // left
             neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z));
             // left down
-            if (currentTile.pos.z - 1 >= 0) neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z - 1));
+            if (currentTile.pos.z - 1 >= 0)
+                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z - 1));
             // left up
-            if (currentTile.pos.z + 1 < World.WorldSizeInTiles) neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z + 1));
+            if (currentTile.pos.z + 1 < World.WorldSizeInTiles)
+                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z + 1));
         }
 
         if (currentTile.pos.x + 1 < World.WorldSizeInTiles)
@@ -150,15 +152,19 @@ public class Pathfinding
             // right
             neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z));
             // right down
-            if (currentTile.pos.z - 1 >= 0) neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z - 1));
+            if (currentTile.pos.z - 1 >= 0)
+                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z - 1));
             // right up
-            if (currentTile.pos.z + 1 < World.WorldSizeInTiles) neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z + 1));
+            if (currentTile.pos.z + 1 < World.WorldSizeInTiles)
+                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z + 1));
         }
 
         // down
-        if (currentTile.pos.z - 1 >= 0) neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.z - 1));
+        if (currentTile.pos.z - 1 >= 0)
+            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.z - 1));
         // up
-        if (currentTile.pos.z + 1 < World.WorldSizeInTiles) neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.z + 1));
+        if (currentTile.pos.z + 1 < World.WorldSizeInTiles)
+            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.z + 1));
 
         return neighbourList;
     }

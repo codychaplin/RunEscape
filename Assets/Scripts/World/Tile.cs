@@ -16,10 +16,10 @@ public class Tile
         
     }
 
-    public Tile(Vector3Int _pos)
+    public Tile(Vector3Int _pos, bool _canWalk)
     {
         pos = _pos;
-        canWalk = true;
+        canWalk = _canWalk;
     }
 
     public void calculateFCost()
