@@ -18,6 +18,7 @@ public class World : MonoBehaviour
 
     // stores tiles (globally)
     public static Tile[,] tileMap = new Tile[WorldSizeInTiles, WorldSizeInTiles];
+    public static Vector3[,] faceMap = new Vector3[WorldSizeInTiles, WorldSizeInTiles];
 
     // array of chunks in game
     GameObject[,] chunks = new GameObject[WorldSizeInChunks, WorldSizeInChunks];
@@ -25,6 +26,7 @@ public class World : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //GetFaces();
         GetVertices();
         GetData();
     }
@@ -71,6 +73,31 @@ public class World : MonoBehaviour
         }
     }
 
+    void GetFaces()
+    {
+        StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\Faces.txt", FileMode.OpenOrCreate, FileAccess.Read));
+
+        int i = 0;
+        while (textIn.Peek() != -1)
+        {
+            string row = textIn.ReadLine();
+            string[] column = row.Split('|');
+
+            for (int j = 0; j < column.Length - 1; j++)
+            {
+                string[] vector = column[j].Split(',');
+
+                // swap y and z when importing from Blender
+                float y = float.Parse(vector[2]);
+                float newY = (y < (int)y + 0.49f) ? (int)y : y;
+                Vector3 pos = new Vector3(float.Parse(vector[0]), newY, float.Parse(vector[1]));
+                faceMap[i, j] = pos;
+            }
+
+            i++;
+        }
+    }
+
     void GetVertices()
     {
         StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\vertices.txt", FileMode.OpenOrCreate, FileAccess.Read));
@@ -109,6 +136,8 @@ public class World : MonoBehaviour
                     Gizmos.DrawSphere(tileMap[i, j].pos, 0.2f);
                 else
                     Gizmos.DrawCube(tileMap[i, j].pos, Vector3.one / 2);
+
+                //Gizmos.DrawSphere(faceMap[i, j], 0.2f);
             }
     }
 }

@@ -17,17 +17,19 @@ public class Pathfinding
         Instance = this;
     }
 
-    public List<Vector3> FindVectorPath(Vector3 startPos, Vector3 endPos)
+    public List<Vector2> FindVectorPath(Vector3 startPos, Vector3 endPos)
     {
-        if (startPos != endPos)
+        if (startPos != endPos) // if not on same tile
         {
-            List<Tile> path = FindPath((int)startPos.x, (int)startPos.z, (int)endPos.x, (int)endPos.z);
+            List<Tile> path = FindPath((int)startPos.x, (int)startPos.z, (int)endPos.x, (int)endPos.z); // find path
             if (path == null) { return null; }
             else
             {
-                List<Vector3> vectorPath = new List<Vector3>();
-                for (int i = 1; i < path.Count; i++)
-                    vectorPath.Add(new Vector3(path[i].pos.x + 0.5f, path[i].pos.y, path[i].pos.z + 0.5f));
+                // convert tiles to vector3s
+                List<Vector2> vectorPath = new List<Vector2>();
+
+                for (int i = 0; i < path.Count; i++)
+                    vectorPath.Add(new Vector2(path[i].pos.x + 0.5f, path[i].pos.z + 0.5f));
 
                 return vectorPath;
             }
