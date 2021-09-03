@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Drops
   - WorldSpaceCanvas
+  - Chunk
   layers:
   - Default
   - TransparentFX

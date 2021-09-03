@@ -1,7 +1,7 @@
 import bpy
 
 path = bpy.path.abspath("//")
-text = open(path + "..\WorldData\Data.txt", "w")
+text = open(path + "..\WorldData\Obstacles.txt", "w")
 col = bpy.data.collections['Obstacles']
 n = '\n'
 

@@ -33,7 +33,6 @@ public class Inventory : MonoBehaviour
             for (int i = 0; i < items.Length; i++)
                 if (items[i] == null)
                 {
-                    Debug.Log("Added " + item.name + " at index " + i);
                     items[i] = item; // add item to inventory slot
                     itemCount++;
                     break; // breaks at first empty slot
@@ -52,14 +51,12 @@ public class Inventory : MonoBehaviour
         {
             if (items[newIndex] == null)
             {
-                Debug.Log("Added " + item.name + " at index " + newIndex);
                 Remove(items[oldIndex]); // removes old item;
                 items[newIndex] = item; // add item to inventory slot
                 itemCount++;
             }
             else if (items[newIndex] != null)
             {
-                Debug.Log("Swapped items at index " + oldIndex + " and " + newIndex);
                 // swaps items at indicies
                 Item tempItem = items[newIndex];
                 items[newIndex] = items[oldIndex];
@@ -79,7 +76,6 @@ public class Inventory : MonoBehaviour
         {
             if (items[i] == item)
             {
-                Debug.Log("Removed " + item.name + " at index " + i);
                 items[i] = null; // remove item from list
                 itemCount--;
                 break; // break once found

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
 
 public class World : MonoBehaviour
 {
@@ -20,24 +21,43 @@ public class World : MonoBehaviour
     public static Tile[,] tileMap = new Tile[WorldSizeInTiles, WorldSizeInTiles];
 
     // array of chunks in game
-    GameObject[,] chunks = new GameObject[WorldSizeInChunks, WorldSizeInChunks];
+    Transform[,] chunks = new Transform[WorldSizeInChunks, WorldSizeInChunks];
 
     // Start is called before the first frame update
     void Start()
     {
-        //GetFaces();
-        GetVertices();
+        InitWorld();
         GetData();
     }
 
     // Update is called once per frame
     void Update()
     {
+
+    }
+
+    void InitWorld()
+    {
+        for (int i = 0; i < tileMap.GetLength(0); i++)
+            for (int j = 0; j < tileMap.GetLength(1); j++)
+                tileMap[i, j] = new Tile(new Vector2Int(i, j), true); // initializes tileMap
+
+        Transform chunkParent = transform.GetChild(0); // gets WorldMesh object
+        List<Transform> chunkList = new List<Transform>(); // creates list
+
+        foreach (Transform child in chunkParent) // foreach child in parent
+            if (child.tag == "Chunk") // if tag = Chunk
+                chunkList.Add(child); // add to list
+
+        int index = 0;
+        for (int i = 0; i < chunks.GetLength(0); i++)
+            for (int j = 0; j < chunks.GetLength(1); j++)
+                chunks[i, j] = chunkList[index++]; // transfers list to array
     }
 
     void GetData()
     {
-        StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\data.txt", FileMode.OpenOrCreate, FileAccess.Read));
+        StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\Obstacles.txt", FileMode.OpenOrCreate, FileAccess.Read));
 
         while (textIn.Peek() != -1)
         {
@@ -69,30 +89,6 @@ public class World : MonoBehaviour
                 if (flag)
                     break;
             }
-        }
-    }
-
-    void GetVertices()
-    {
-        StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\vertices.txt", FileMode.OpenOrCreate, FileAccess.Read));
-
-        int i = 0;
-        while (textIn.Peek() != -1)
-        {
-            string row = textIn.ReadLine();
-            string[] column = row.Split('|');
-
-            for (int j = 0; j < column.Length - 1; j++)
-            {
-                string[] vector = column[j].Split(',');
-
-                // swap y and z when importing from Blender
-                Vector2Int pos = new Vector2Int(int.Parse(vector[0]), int.Parse(vector[1]));
-                Tile tile = new Tile(pos, true);
-                tileMap[i, j] = tile;
-            }
-
-            i++;
         }
     }
 
