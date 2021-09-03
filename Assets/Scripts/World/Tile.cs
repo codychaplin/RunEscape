@@ -2,7 +2,7 @@
 
 public class Tile
 {
-    public Vector3Int pos { get; private set; }
+    public Vector2Int pos { get; private set; }
     public bool canWalk { get; set; }
 
     // pathfinding
@@ -16,7 +16,7 @@ public class Tile
         
     }
 
-    public Tile(Vector3Int _pos, bool _canWalk)
+    public Tile(Vector2Int _pos, bool _canWalk)
     {
         pos = _pos;
         canWalk = _canWalk;

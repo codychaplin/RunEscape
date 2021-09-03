@@ -29,7 +29,7 @@ public class Pathfinding
                 List<Vector2> vectorPath = new List<Vector2>();
 
                 for (int i = 0; i < path.Count; i++)
-                    vectorPath.Add(new Vector2(path[i].pos.x + 0.5f, path[i].pos.z + 0.5f));
+                    vectorPath.Add(new Vector2(path[i].pos.x + 0.5f, path[i].pos.y + 0.5f));
 
                 return vectorPath;
             }
@@ -81,6 +81,14 @@ public class Pathfinding
                     closedList.Add(neighbour);
                     continue;
                 }
+                if (neighbour.pos.x != currentTile.pos.x && neighbour.pos.y != currentTile.pos.y)
+                {
+                    // if there is an obstacle between a diagonal neighbour, skip
+                    Vector2Int difference = neighbour.pos - currentTile.pos;
+                    if (!World.GetTile(currentTile.pos.x + difference.x, currentTile.pos.y).canWalk // (x + difference.x, y)
+                        || !World.GetTile(currentTile.pos.x, currentTile.pos.y + difference.y).canWalk) // (x, y + difference.y)
+                        continue;
+                }
 
                 int gCost = currentTile.gCost + CalculateHCost(currentTile, neighbour);
                 if (gCost < neighbour.gCost)
@@ -118,7 +126,7 @@ public class Pathfinding
     public int CalculateHCost(Tile a, Tile b)
     {
         int xDistance = Mathf.Abs(a.pos.x - b.pos.x);
-        int zDistance = Mathf.Abs(a.pos.z - b.pos.z);
+        int zDistance = Mathf.Abs(a.pos.y - b.pos.y);
         int remaining = Mathf.Abs(xDistance - zDistance);
         return DIAGONAL_COST * Mathf.Min(xDistance, zDistance) + STRAIGHT_COST * remaining;
     }
@@ -139,34 +147,26 @@ public class Pathfinding
 
         if (currentTile.pos.x - 1 >= 0)
         {
-            // left
-            neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z));
-            // left down
-            if (currentTile.pos.z - 1 >= 0)
-                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z - 1));
-            // left up
-            if (currentTile.pos.z + 1 < World.WorldSizeInTiles)
-                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.z + 1));
+            neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.y)); // left
+            if (currentTile.pos.y - 1 >= 0)
+                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.y - 1)); // left down
+            if (currentTile.pos.y + 1 < World.WorldSizeInTiles)
+                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.y + 1));// left up
         }
 
         if (currentTile.pos.x + 1 < World.WorldSizeInTiles)
         {
-            // right
-            neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z));
-            // right down
-            if (currentTile.pos.z - 1 >= 0)
-                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z - 1));
-            // right up
-            if (currentTile.pos.z + 1 < World.WorldSizeInTiles)
-                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.z + 1));
+            neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.y)); // right
+            if (currentTile.pos.y - 1 >= 0)
+                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.y - 1)); // right down
+            if (currentTile.pos.y + 1 < World.WorldSizeInTiles)
+                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.y + 1)); // right up
         }
 
-        // down
-        if (currentTile.pos.z - 1 >= 0)
-            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.z - 1));
-        // up
-        if (currentTile.pos.z + 1 < World.WorldSizeInTiles)
-            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.z + 1));
+        if (currentTile.pos.y - 1 >= 0)
+            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.y - 1)); // down
+        if (currentTile.pos.y + 1 < World.WorldSizeInTiles)
+            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.y + 1)); // up
 
         return neighbourList;
     }

@@ -18,7 +18,6 @@ public class World : MonoBehaviour
 
     // stores tiles (globally)
     public static Tile[,] tileMap = new Tile[WorldSizeInTiles, WorldSizeInTiles];
-    public static Vector3[,] faceMap = new Vector3[WorldSizeInTiles, WorldSizeInTiles];
 
     // array of chunks in game
     GameObject[,] chunks = new GameObject[WorldSizeInChunks, WorldSizeInChunks];
@@ -46,15 +45,15 @@ public class World : MonoBehaviour
             string[] column = row.Split(',');
 
             // swap y and z when importing from Blender
-            Vector3Int pos = new Vector3Int(int.Parse(column[0]), int.Parse(column[2]), int.Parse(column[1]));
+            Vector2Int pos = new Vector2Int(int.Parse(column[0]), int.Parse(column[1]));
 
             bool flag = false;
             for (int i = 0; i < tileMap.GetLength(0); i++) // checks each row
             {
                 if (pos.x == tileMap[i, tileMap.GetLength(0) - 1].pos.x) // if pos.x matches pos.x in row
                 {
-                    // if pos.z >= pos.z halfway through tileMap[i, ], search second half, otherwise, start at 0
-                    int index = (pos.z >= tileMap[i, (tileMap.GetLength(1) - 1) / 2].pos.z) ? (tileMap.GetLength(1) - 1) / 2 : 0;
+                    // if pos.y >= pos.y halfway through tileMap[i, ], search second half, otherwise, start at 0
+                    int index = (pos.y >= tileMap[i, (tileMap.GetLength(1) - 1) / 2].pos.y) ? (tileMap.GetLength(1) - 1) / 2 : 0;
 
                     for (int j = index; j < tileMap.GetLength(1); j++) // checks each column
                     {
@@ -73,31 +72,6 @@ public class World : MonoBehaviour
         }
     }
 
-    void GetFaces()
-    {
-        StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\Faces.txt", FileMode.OpenOrCreate, FileAccess.Read));
-
-        int i = 0;
-        while (textIn.Peek() != -1)
-        {
-            string row = textIn.ReadLine();
-            string[] column = row.Split('|');
-
-            for (int j = 0; j < column.Length - 1; j++)
-            {
-                string[] vector = column[j].Split(',');
-
-                // swap y and z when importing from Blender
-                float y = float.Parse(vector[2]);
-                float newY = (y < (int)y + 0.49f) ? (int)y : y;
-                Vector3 pos = new Vector3(float.Parse(vector[0]), newY, float.Parse(vector[1]));
-                faceMap[i, j] = pos;
-            }
-
-            i++;
-        }
-    }
-
     void GetVertices()
     {
         StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\vertices.txt", FileMode.OpenOrCreate, FileAccess.Read));
@@ -113,7 +87,7 @@ public class World : MonoBehaviour
                 string[] vector = column[j].Split(',');
 
                 // swap y and z when importing from Blender
-                Vector3Int pos = new Vector3Int(int.Parse(vector[0]), int.Parse(vector[2]), int.Parse(vector[1]));
+                Vector2Int pos = new Vector2Int(int.Parse(vector[0]), int.Parse(vector[1]));
                 Tile tile = new Tile(pos, true);
                 tileMap[i, j] = tile;
             }
@@ -129,15 +103,6 @@ public class World : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        for (int i = 0; i < tileMap.GetLength(0); i++)
-            for (int j = 0; j < tileMap.GetLength(1); j++)
-            {
-                if (tileMap[i, j].canWalk)
-                    Gizmos.DrawSphere(tileMap[i, j].pos, 0.2f);
-                else
-                    Gizmos.DrawCube(tileMap[i, j].pos, Vector3.one / 2);
 
-                //Gizmos.DrawSphere(faceMap[i, j], 0.2f);
-            }
     }
 }
