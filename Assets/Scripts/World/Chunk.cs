@@ -2,7 +2,7 @@
 
 public class Chunk
 {
-    Transform chunk;
+    public Transform chunk { get; private set; }
     
     public int x { get; private set; }
     public int z { get; private set; }

@@ -7,10 +7,11 @@ public class World : MonoBehaviour
     [Header("References")]
     public Transform player;
     public Material material;
+    public GameObject fog;
 
     public static readonly int ChunkWidth = 16;
     public static readonly int WorldSizeInChunks = 6;
-    static readonly int ViewDistance = 1;
+    static readonly int ViewDistance = 2;
 
     // used to get the world size in tiles, given size of world in chunks
     public static int WorldSizeInTiles
@@ -35,11 +36,14 @@ public class World : MonoBehaviour
 
         lastPlayerChunkPos = GetChunk(player.position); // set chunk player is on
         CheckViewDistance();
+        fog.SetActive(true);
     }
 
     // Update is called once per frame
     void Update()
     {
+        fog.transform.position = player.position;
+
         playerChunkPos = GetChunk(player.position); // update player chunk position
         if (playerChunkPos != lastPlayerChunkPos) // if on different chunk
             CheckViewDistance();
@@ -51,19 +55,23 @@ public class World : MonoBehaviour
             for (int j = 0; j < tileMap.GetLength(1); j++)
                 tileMap[i, j] = new Tile(new Vector2Int(i, j), true); // initializes tileMap
 
-        Transform chunkParent = transform.GetChild(0); // gets WorldMesh object
+        Transform chunksParent = transform.GetChild(0).GetChild(0); // gets Chunks group
+        Transform obstaclesParent = transform.GetChild(0).GetChild(1); // gets Obstacles group
         List<Transform> chunkList = new List<Transform>(); // creates list
 
-        foreach (Transform child in chunkParent) // foreach child in parent
-            if (child.tag == "Chunk") // if tag = Chunk
-                if (!child.GetComponent<MeshCollider>()) // add MeshCollider
-                {
-                    MeshCollider meshCollider = child.gameObject.AddComponent<MeshCollider>();
-                    Mesh mesh = child.GetComponent<MeshFilter>().mesh;
-                    meshCollider.sharedMesh = mesh;
-                    child.gameObject.SetActive(false);
-                    chunkList.Add(child); // add to list
-                }
+        foreach (Transform child in chunksParent) // foreach child in parent
+        {
+            if (!child.TryGetComponent<MeshCollider>(out MeshCollider meshCollider)) // add MeshCollider
+            {
+                meshCollider = child.gameObject.AddComponent<MeshCollider>();
+                Mesh mesh = child.GetComponent<MeshFilter>().mesh;
+                meshCollider.sharedMesh = mesh;
+                Debug.Log(child.name + " has no collider");
+            }
+                
+            child.gameObject.SetActive(false);
+            chunkList.Add(child); // add to list
+        }
 
         if (chunkList.Count == chunks.Length)
         {
@@ -74,6 +82,17 @@ public class World : MonoBehaviour
         }
         else
             Debug.Log("Chunks list/array not same size");
+
+        int length = obstaclesParent.childCount;
+        for (int i = 0; i < length; i++)
+        {
+            Chunk chunk = GetChunk(obstaclesParent.GetChild(0).position);
+            if (chunk != null)
+                obstaclesParent.GetChild(0).parent = chunk.chunk;
+        }
+
+        if (obstaclesParent.childCount > 0)
+            Debug.Log("Not all children moved under chunk");
     }
 
     void GetObstacles()
