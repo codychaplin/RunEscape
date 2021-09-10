@@ -8,10 +8,14 @@ public class World : MonoBehaviour
     public Transform player;
     public Material material;
     public GameObject fog;
+    public Transform obstacles;
 
     public static readonly int ChunkWidth = 16;
     public static readonly int WorldSizeInChunks = 6;
+
     static readonly int ViewDistance = 2;
+
+    public enum Walls { X, N, E, W, S, NE, NW, SE, SW };
 
     // used to get the world size in tiles, given size of world in chunks
     public static int WorldSizeInTiles
@@ -42,7 +46,7 @@ public class World : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        fog.transform.position = player.position;
+        fog.transform.position = player.position; // fog follows player
 
         playerChunkPos = GetChunk(player.position); // update player chunk position
         if (playerChunkPos != lastPlayerChunkPos) // if on different chunk
@@ -53,7 +57,7 @@ public class World : MonoBehaviour
     {
         for (int i = 0; i < tileMap.GetLength(0); i++)
             for (int j = 0; j < tileMap.GetLength(1); j++)
-                tileMap[i, j] = new Tile(new Vector2Int(i, j), true); // initializes tileMap
+                tileMap[i, j] = new Tile(new Vector2Int(i, j)); // initializes tileMap
 
         Transform chunksParent = transform.GetChild(0).GetChild(0); // gets Chunks group
         Transform obstaclesParent = transform.GetChild(0).GetChild(1); // gets Obstacles group
@@ -97,39 +101,22 @@ public class World : MonoBehaviour
 
     void GetObstacles()
     {
-        StreamReader textIn = new StreamReader(new FileStream(@"Assets\WorldData\Obstacles.txt", FileMode.OpenOrCreate, FileAccess.Read));
-
-        while (textIn.Peek() != -1)
+        foreach (Transform child in obstacles)
         {
-            string row = textIn.ReadLine();
-            string[] column = row.Split(',');
-
-            // swap y and z when importing from Blender
-            Vector2Int pos = new Vector2Int(int.Parse(column[0]), int.Parse(column[1]));
-
-            bool flag = false;
-            for (int i = 0; i < tileMap.GetLength(0); i++) // checks each row
+            Obstacle obstacle = child.GetComponent<Obstacle>();
+            if (obstacle != null)
             {
-                if (pos.x == tileMap[i, tileMap.GetLength(0) - 1].pos.x) // if pos.x matches pos.x in row
-                {
-                    // if pos.y >= pos.y halfway through tileMap[i, ], search second half, otherwise, start at 0
-                    int index = (pos.y >= tileMap[i, (tileMap.GetLength(1) - 1) / 2].pos.y) ? (tileMap.GetLength(1) - 1) / 2 : 0;
+                int x = Mathf.FloorToInt(obstacle.transform.position.x);
+                int z = Mathf.FloorToInt(obstacle.transform.position.z);
 
-                    for (int j = index; j < tileMap.GetLength(1); j++) // checks each column
-                    {
-                        if (tileMap[i, j].pos == pos) // is pos matches, assign and break
-                        {
-                            tileMap[i, j].canWalk = false;
-                            flag = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (flag)
-                    break;
+                for (int i = x, ix = 0; i < x + obstacle.xSize; i++, ix++)
+                    for (int j = z, jz = 0; j < z + obstacle.zSize; j++, jz++)
+                        if (obstacle.walls[ix, jz] != Walls.X)
+                            tileMap[i, j].wall = obstacle.walls[ix, jz];
             }
-        }
+            else
+                Debug.Log("no obstacle script");
+        }   
     }
 
     void CheckViewDistance()

@@ -12,7 +12,7 @@ public class ClickableObject : MonoBehaviour,
 
     void Start()
     {
-        canvas = FindObjectOfType<Canvas>();
+        canvas = GameObject.FindWithTag("Canvas").GetComponent<Canvas>();
         canvasGroup = GetComponent<CanvasGroup>();
     }
 
@@ -20,12 +20,12 @@ public class ClickableObject : MonoBehaviour,
     {
         if (eventData.button == PointerEventData.InputButton.Left && Input.GetKey(KeyCode.LeftShift))
         {
-            Debug.Log("Shift + left click");
+            //Debug.Log("Shift + left click");
             slot.DropItem();
         }
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            Debug.Log("left click");
+            //Debug.Log("left click");
             slot.UseItem();
         }
         else if (eventData.button == PointerEventData.InputButton.Middle)
@@ -38,7 +38,7 @@ public class ClickableObject : MonoBehaviour,
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            Debug.Log("left click down");
+            //Debug.Log("left click down");
         }
     }
 
@@ -46,6 +46,7 @@ public class ClickableObject : MonoBehaviour,
     {
         //Debug.Log("OnDrag");
         icon.anchoredPosition += eventData.delta / canvas.scaleFactor;
+        //icon.anchoredPosition += eventData.position;
     }
 
     public void OnBeginDrag(PointerEventData eventData)

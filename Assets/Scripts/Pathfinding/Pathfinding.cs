@@ -28,7 +28,7 @@ public class Pathfinding
                 // convert tiles to vector3s
                 List<Vector2> vectorPath = new List<Vector2>();
 
-                for (int i = 0; i < path.Count; i++)
+                for (int i = 1; i < path.Count; i++)
                     vectorPath.Add(new Vector2(path[i].pos.x + 0.5f, path[i].pos.y + 0.5f));
 
                 return vectorPath;
@@ -75,21 +75,29 @@ public class Pathfinding
 
             foreach (Tile neighbour in GetNeighbours(currentTile))
             {
+                // if statements check if neighbour is valid
                 if (closedList.Contains(neighbour)) continue; // if already checked
                 if (!neighbour.canWalk) // if neighbour is not walkable
                 {
                     closedList.Add(neighbour);
                     continue;
                 }
+                Vector2Int difference = neighbour.pos - currentTile.pos;
+
+                if (!CanMove(currentTile, neighbour, difference))
+                    continue;
+
                 if (neighbour.pos.x != currentTile.pos.x && neighbour.pos.y != currentTile.pos.y)
                 {
                     // if there is an obstacle between a diagonal neighbour, skip
-                    Vector2Int difference = neighbour.pos - currentTile.pos;
                     if (!World.GetTile(currentTile.pos.x + difference.x, currentTile.pos.y).canWalk // (x + difference.x, y)
-                        || !World.GetTile(currentTile.pos.x, currentTile.pos.y + difference.y).canWalk) // (x, y + difference.y)
+                        || !World.GetTile(currentTile.pos.x, currentTile.pos.y + difference.y).canWalk // (x, y + difference.y)
+                        || World.GetTile(currentTile.pos.x + difference.x, currentTile.pos.y).wall != World.Walls.X
+                        || World.GetTile(currentTile.pos.x, currentTile.pos.y + difference.y).wall != World.Walls.X)
                         continue;
                 }
 
+                // calculates cost of neighbour
                 int gCost = currentTile.gCost + CalculateHCost(currentTile, neighbour);
                 if (gCost < neighbour.gCost)
                 {
@@ -169,5 +177,79 @@ public class Pathfinding
             neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.y + 1)); // up
 
         return neighbourList;
+    }
+
+    bool CanMove(Tile currentTile, Tile neighbour, Vector2Int difference)
+    {
+        if (difference.x == 0 && difference.y > 0) // N
+        {
+            if (currentTile.wall == World.Walls.N || currentTile.wall == World.Walls.NE
+                || currentTile.wall == World.Walls.NW || neighbour.wall == World.Walls.S
+                || neighbour.wall == World.Walls.SW || neighbour.wall == World.Walls.SE)
+                return false;
+        }
+        else if (difference.x == 0 && difference.y < 0) // S
+        {
+            if (currentTile.wall == World.Walls.S || currentTile.wall == World.Walls.SE
+                || currentTile.wall == World.Walls.SW || neighbour.wall == World.Walls.N
+                || neighbour.wall == World.Walls.NW || neighbour.wall == World.Walls.NE)
+                return false;
+        }
+        else if (difference.x > 0 && difference.y == 0) // E
+        {
+            if (currentTile.wall == World.Walls.E || currentTile.wall == World.Walls.NE
+                || currentTile.wall == World.Walls.SE || neighbour.wall == World.Walls.W
+                || neighbour.wall == World.Walls.NW || neighbour.wall == World.Walls.SW)
+                return false;
+        }
+        else if (difference.x < 0 && difference.y == 0) // W
+        {
+            if (currentTile.wall == World.Walls.W || currentTile.wall == World.Walls.NW
+                || currentTile.wall == World.Walls.SW || neighbour.wall == World.Walls.E
+                || neighbour.wall == World.Walls.NE || neighbour.wall == World.Walls.SE)
+                return false;
+        }
+        else if (difference.x > 0 && difference.y > 0) // NE
+        {
+            if (currentTile.wall == World.Walls.N || currentTile.wall == World.Walls.NE
+                || currentTile.wall == World.Walls.NW || currentTile.wall == World.Walls.E
+                || currentTile.wall == World.Walls.SE
+                || neighbour.wall == World.Walls.S || neighbour.wall == World.Walls.W
+                || neighbour.wall == World.Walls.SE || neighbour.wall == World.Walls.SW
+                || neighbour.wall == World.Walls.NW)
+                return false;
+        }
+        else if (difference.x < 0 && difference.y > 0) // NW
+        {
+            if (currentTile.wall == World.Walls.N || currentTile.wall == World.Walls.NE
+                || currentTile.wall == World.Walls.NW || currentTile.wall == World.Walls.W
+                || currentTile.wall == World.Walls.SW
+                || neighbour.wall == World.Walls.S || neighbour.wall == World.Walls.E
+                || neighbour.wall == World.Walls.SE || neighbour.wall == World.Walls.SW
+                || neighbour.wall == World.Walls.NE)
+                return false;
+        }
+        else if (difference.x > 0 && difference.y < 0) // SE
+        {
+            if (currentTile.wall == World.Walls.S || currentTile.wall == World.Walls.SE
+                || currentTile.wall == World.Walls.SW || currentTile.wall == World.Walls.E
+                || currentTile.wall == World.Walls.NE
+                || neighbour.wall == World.Walls.N || neighbour.wall == World.Walls.W
+                || neighbour.wall == World.Walls.NE || neighbour.wall == World.Walls.NW
+                || neighbour.wall == World.Walls.SW)
+                return false;
+        }
+        else if (difference.x < 0 && difference.y < 0) // SW
+        {
+            if (currentTile.wall == World.Walls.S || currentTile.wall == World.Walls.SE
+                || currentTile.wall == World.Walls.SW || currentTile.wall == World.Walls.W
+                || currentTile.wall == World.Walls.NW
+                || neighbour.wall == World.Walls.N || neighbour.wall == World.Walls.E
+                || neighbour.wall == World.Walls.NE || neighbour.wall == World.Walls.NW
+                || neighbour.wall == World.Walls.SE)
+                return false;
+        }
+        
+        return true;
     }
 }

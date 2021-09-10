@@ -4,6 +4,7 @@ public class Tile
 {
     public Vector2Int pos { get; private set; }
     public bool canWalk { get; set; }
+    public World.Walls wall { get; set; }
 
     // pathfinding
     public int gCost { get; set; } // walking cost from start tile
@@ -16,10 +17,11 @@ public class Tile
         
     }
 
-    public Tile(Vector2Int _pos, bool _canWalk)
+    public Tile(Vector2Int _pos)
     {
         pos = _pos;
-        canWalk = _canWalk;
+        canWalk = true;
+        wall = World.Walls.X;
     }
 
     public void calculateFCost()

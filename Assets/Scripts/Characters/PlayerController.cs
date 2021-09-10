@@ -43,25 +43,23 @@ public class PlayerController : MonoBehaviour
             {
                 pathList = Pathfinding.Instance.FindVectorPath(SnapToGrid(transform.position), SnapToGrid(hit.point));
                 pathIndex = 0;
-                RemoveFocus(); // remove focus, if any
+
+                Interactable interactable = hit.collider.GetComponent<Interactable>();
+                if (interactable != null)
+                    SetFocus(interactable); // if focus is interactable, set focus
+                else
+                    RemoveFocus(); // remove focus, if any
             }
         }
 
-        if (Input.GetMouseButtonDown(1)) // if right click (interact)
+        if (Input.GetMouseButtonDown(1)) // if right click (examine)
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
             if (Physics.Raycast(ray, out hit, 1000, ~excludeMask))
             {
-                Interactable interactable = hit.collider.GetComponent<Interactable>();
                 
-                if (interactable != null) // if focus is interactable, set focus
-                {
-                    pathList = Pathfinding.Instance.FindVectorPath(SnapToGrid(transform.position), SnapToGrid(hit.point));
-                    pathIndex = 0;
-                    SetFocus(interactable);
-                }
             }
         }
 
