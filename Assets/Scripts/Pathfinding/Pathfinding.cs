@@ -1,35 +1,35 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Pathfinding
 {
-    List<Tile> openList;
-    List<Tile> closedList;
+    List<Node> openList;
+    List<Node> closedList;
 
     const int STRAIGHT_COST = 10; // 1 * 10
     const int DIAGONAL_COST = 14; // square root of 2 * 10
+    const int MAX_DISTANCE = 30; // max distance to search for endNode
 
-    public static Pathfinding Instance { get; private set; }
-
+    Node[,] nodeMap = new Node[World.WorldSizeInTiles, World.WorldSizeInTiles];
+    
     public Pathfinding()
     {
-        Instance = this;
+        
     }
 
     public List<Vector2> FindVectorPath(Vector3 startPos, Vector3 endPos)
     {
         if (startPos != endPos) // if not on same tile
         {
-            List<Tile> path = FindPath((int)startPos.x, (int)startPos.z, (int)endPos.x, (int)endPos.z); // find path
+            List<Node> path = FindPath((int)startPos.x, (int)startPos.z, (int)endPos.x, (int)endPos.z); // find path
             if (path == null) { return null; }
             else
             {
-                // convert tiles to vector3s
+                // convert tiles to vector2s
                 List<Vector2> vectorPath = new List<Vector2>();
 
                 for (int i = 1; i < path.Count; i++)
-                    vectorPath.Add(new Vector2(path[i].pos.x + 0.5f, path[i].pos.y + 0.5f));
+                    vectorPath.Add(new Vector2(path[i].x + 0.5f, path[i].z + 0.5f));
 
                 return vectorPath;
             }
@@ -38,42 +38,44 @@ public class Pathfinding
             return null;
     }
 
-    public List<Tile> FindPath(int startX, int startZ, int endX, int endZ)
+    public List<Node> FindPath(int startX, int startZ, int endX, int endZ)
     {
-        Tile startTile = World.GetTile(startX, startZ); // gets starting tile object
-        Tile endTile = World.GetTile(endX, endZ); // gets ending tile object
-
-        if (startTile == null || endTile == null) // if either are null, return
+        if (!World.IsInWorld(new Vector2Int(startX, startZ)) || !World.IsInWorld(new Vector2Int(endX, endZ)))
             return null;
 
-        openList = new List<Tile> { startTile };
-        closedList = new List<Tile>();
+        if (Mathf.Abs(startX - endX) >= MAX_DISTANCE || Mathf.Abs(startZ - endZ) >= MAX_DISTANCE)
+        {
+            Debug.Log("target out of range");
+            return null;
+        }
 
-        // initializes tileMap for pathfinding
-        for (int x = 0; x < World.tileMap.GetLength(0); x++)
-            for (int z = 0; z < World.tileMap.GetLength(1); z++)
-            {
-                World.tileMap[x, z].gCost = int.MaxValue;
-                World.tileMap[x, z].calculateFCost();
-                World.tileMap[x, z].previous = null;
-            }
+        // initializes nodeMap for pathfinding
+        for (int x = Mathf.Max(0, startX - MAX_DISTANCE); x < Mathf.Min(startX + MAX_DISTANCE, World.WorldSizeInTiles); x++)
+            for (int z = Mathf.Max(0, startZ - MAX_DISTANCE); z < Mathf.Min(startZ + MAX_DISTANCE, World.WorldSizeInTiles); z++)
+                nodeMap[x, z] = new Node(x, 0f, z, World.tileMap[x, z].canWalk, World.tileMap[x, z].wall);
 
-        startTile.gCost = 0;
-        startTile.hCost = CalculateHCost(startTile, endTile);
-        startTile.calculateFCost();
+        Node startNode = nodeMap[startX, startZ];
+        Node endNode = nodeMap[endX, endZ];
+
+        openList = new List<Node> { startNode };
+        closedList = new List<Node>();
+
+        startNode.gCost = 0;
+        startNode.hCost = CalculateHCost(startNode, endNode);
+        startNode.calculateFCost();
 
         // main algorithm loop
         while (openList.Count > 0)
         {
-            Tile currentTile = GetLowestFCostTile(openList); // checks best candidate tile
+            Node currentNode = GetLowestFCostNode(openList); // checks best candidate tile
 
-            if (currentTile == endTile)
-                return CalculatePath(endTile); // END OF PATH
+            if (currentNode == endNode)
+                return CalculatePath(endNode); // END OF PATH
 
-            openList.Remove(currentTile);
-            closedList.Add(currentTile);
+            openList.Remove(currentNode);
+            closedList.Add(currentNode);
 
-            foreach (Tile neighbour in GetNeighbours(currentTile))
+            foreach (Node neighbour in GetNeighbours(currentNode))
             {
                 // if statements check if neighbour is valid
                 if (closedList.Contains(neighbour)) continue; // if already checked
@@ -82,28 +84,28 @@ public class Pathfinding
                     closedList.Add(neighbour);
                     continue;
                 }
-                Vector2Int difference = neighbour.pos - currentTile.pos;
+                Vector2Int difference = new Vector2Int(neighbour.x, neighbour.z) - new Vector2Int(currentNode.x, currentNode.z);
 
-                if (!CanMove(currentTile, neighbour, difference))
+                if (!CanMove(currentNode, neighbour, difference))
                     continue;
 
-                if (neighbour.pos.x != currentTile.pos.x && neighbour.pos.y != currentTile.pos.y)
+                if (neighbour.x != currentNode.x && neighbour.z != currentNode.z)
                 {
                     // if there is an obstacle between a diagonal neighbour, skip
-                    if (!World.GetTile(currentTile.pos.x + difference.x, currentTile.pos.y).canWalk // (x + difference.x, y)
-                        || !World.GetTile(currentTile.pos.x, currentTile.pos.y + difference.y).canWalk // (x, y + difference.y)
-                        || World.GetTile(currentTile.pos.x + difference.x, currentTile.pos.y).wall != World.Walls.X
-                        || World.GetTile(currentTile.pos.x, currentTile.pos.y + difference.y).wall != World.Walls.X)
+                    if (!nodeMap[currentNode.x + difference.x, currentNode.z].canWalk // (x + difference.x, y)
+                        || !nodeMap[currentNode.x, currentNode.z + difference.y].canWalk // (x, y + difference.y)
+                        || nodeMap[currentNode.x + difference.x, currentNode.z].wall != World.Walls.X
+                        || nodeMap[currentNode.x, currentNode.z + difference.y].wall != World.Walls.X)
                         continue;
                 }
-
+                
                 // calculates cost of neighbour
-                int gCost = currentTile.gCost + CalculateHCost(currentTile, neighbour);
+                int gCost = currentNode.gCost + CalculateHCost(currentNode, neighbour);
                 if (gCost < neighbour.gCost)
                 {
-                    neighbour.previous = currentTile;
+                    neighbour.previous = currentNode;
                     neighbour.gCost = gCost;
-                    neighbour.hCost = CalculateHCost(neighbour, endTile);
+                    neighbour.hCost = CalculateHCost(neighbour, endNode);
                     neighbour.calculateFCost();
 
                     if (!openList.Contains(neighbour))
@@ -115,33 +117,33 @@ public class Pathfinding
         return null;
     }
 
-    List<Tile> CalculatePath(Tile endTile)
+    List<Node> CalculatePath(Node endNode)
     {
-        List<Tile> path = new List<Tile>();
-        path.Add(endTile);
-        Tile currentTile = endTile;
+        List<Node> path = new List<Node>();
+        path.Add(endNode);
+        Node currentNode = endNode;
 
-        while (currentTile.previous != null)
+        while (currentNode.previous != null)
         {
-            path.Add(currentTile.previous);
-            currentTile = currentTile.previous;
+            path.Add(currentNode.previous);
+            currentNode = currentNode.previous;
         }
-
+        
         path.Reverse();
         return path;
     }
 
-    public int CalculateHCost(Tile a, Tile b)
+    public int CalculateHCost(Node a, Node b)
     {
-        int xDistance = Mathf.Abs(a.pos.x - b.pos.x);
-        int zDistance = Mathf.Abs(a.pos.y - b.pos.y);
+        int xDistance = Mathf.Abs(a.x - b.x);
+        int zDistance = Mathf.Abs(a.z - b.z);
         int remaining = Mathf.Abs(xDistance - zDistance);
         return DIAGONAL_COST * Mathf.Min(xDistance, zDistance) + STRAIGHT_COST * remaining;
     }
 
-    Tile GetLowestFCostTile(List<Tile> tileList)
+    Node GetLowestFCostNode(List<Node> tileList)
     {
-        Tile lowest = tileList[0];
+        Node lowest = tileList[0];
         for (int i = 1; i < tileList.Count; i++)
             if (tileList[i].fCost < lowest.fCost)
                 lowest = tileList[i];
@@ -149,71 +151,71 @@ public class Pathfinding
         return lowest;
     }
 
-    List<Tile> GetNeighbours(Tile currentTile)
+    List<Node> GetNeighbours(Node currentNode)
     {
-        List<Tile> neighbourList = new List<Tile>();
+        List<Node> neighbourList = new List<Node>();
 
-        if (currentTile.pos.x - 1 >= 0)
+        if (currentNode.x - 1 >= 0)
         {
-            neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.y)); // left
-            if (currentTile.pos.y - 1 >= 0)
-                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.y - 1)); // left down
-            if (currentTile.pos.y + 1 < World.WorldSizeInTiles)
-                neighbourList.Add(World.GetTile(currentTile.pos.x - 1, currentTile.pos.y + 1));// left up
+            neighbourList.Add(nodeMap[currentNode.x - 1, currentNode.z]); // left
+            if (currentNode.z - 1 >= 0)
+                neighbourList.Add(nodeMap[currentNode.x - 1, currentNode.z - 1]); // left down
+            if (currentNode.z + 1 < World.WorldSizeInTiles)
+                neighbourList.Add(nodeMap[currentNode.x - 1, currentNode.z + 1]);// left up
         }
 
-        if (currentTile.pos.x + 1 < World.WorldSizeInTiles)
+        if (currentNode.x + 1 < World.WorldSizeInTiles)
         {
-            neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.y)); // right
-            if (currentTile.pos.y - 1 >= 0)
-                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.y - 1)); // right down
-            if (currentTile.pos.y + 1 < World.WorldSizeInTiles)
-                neighbourList.Add(World.GetTile(currentTile.pos.x + 1, currentTile.pos.y + 1)); // right up
+            neighbourList.Add(nodeMap[currentNode.x + 1, currentNode.z]); // right
+            if (currentNode.z - 1 >= 0)
+                neighbourList.Add(nodeMap[currentNode.x + 1, currentNode.z - 1]); // right down
+            if (currentNode.z + 1 < World.WorldSizeInTiles)
+                neighbourList.Add(nodeMap[currentNode.x + 1, currentNode.z + 1]); // right up
         }
 
-        if (currentTile.pos.y - 1 >= 0)
-            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.y - 1)); // down
-        if (currentTile.pos.y + 1 < World.WorldSizeInTiles)
-            neighbourList.Add(World.GetTile(currentTile.pos.x, currentTile.pos.y + 1)); // up
+        if (currentNode.z - 1 >= 0)
+            neighbourList.Add(nodeMap[currentNode.x, currentNode.z - 1]); // down
+        if (currentNode.z + 1 < World.WorldSizeInTiles)
+            neighbourList.Add(nodeMap[currentNode.x, currentNode.z + 1]); // up
 
         return neighbourList;
     }
 
-    bool CanMove(Tile currentTile, Tile neighbour, Vector2Int difference)
+    bool CanMove(Node currentNode, Node neighbour, Vector2Int difference)
     {
         if (difference.x == 0 && difference.y > 0) // N
         {
-            if (currentTile.wall == World.Walls.N || currentTile.wall == World.Walls.NE
-                || currentTile.wall == World.Walls.NW || neighbour.wall == World.Walls.S
+            if (currentNode.wall == World.Walls.N || currentNode.wall == World.Walls.NE
+                || currentNode.wall == World.Walls.NW || neighbour.wall == World.Walls.S
                 || neighbour.wall == World.Walls.SW || neighbour.wall == World.Walls.SE)
                 return false;
         }
         else if (difference.x == 0 && difference.y < 0) // S
         {
-            if (currentTile.wall == World.Walls.S || currentTile.wall == World.Walls.SE
-                || currentTile.wall == World.Walls.SW || neighbour.wall == World.Walls.N
+            if (currentNode.wall == World.Walls.S || currentNode.wall == World.Walls.SE
+                || currentNode.wall == World.Walls.SW || neighbour.wall == World.Walls.N
                 || neighbour.wall == World.Walls.NW || neighbour.wall == World.Walls.NE)
                 return false;
         }
         else if (difference.x > 0 && difference.y == 0) // E
         {
-            if (currentTile.wall == World.Walls.E || currentTile.wall == World.Walls.NE
-                || currentTile.wall == World.Walls.SE || neighbour.wall == World.Walls.W
+            if (currentNode.wall == World.Walls.E || currentNode.wall == World.Walls.NE
+                || currentNode.wall == World.Walls.SE || neighbour.wall == World.Walls.W
                 || neighbour.wall == World.Walls.NW || neighbour.wall == World.Walls.SW)
                 return false;
         }
         else if (difference.x < 0 && difference.y == 0) // W
         {
-            if (currentTile.wall == World.Walls.W || currentTile.wall == World.Walls.NW
-                || currentTile.wall == World.Walls.SW || neighbour.wall == World.Walls.E
+            if (currentNode.wall == World.Walls.W || currentNode.wall == World.Walls.NW
+                || currentNode.wall == World.Walls.SW || neighbour.wall == World.Walls.E
                 || neighbour.wall == World.Walls.NE || neighbour.wall == World.Walls.SE)
                 return false;
         }
         else if (difference.x > 0 && difference.y > 0) // NE
         {
-            if (currentTile.wall == World.Walls.N || currentTile.wall == World.Walls.NE
-                || currentTile.wall == World.Walls.NW || currentTile.wall == World.Walls.E
-                || currentTile.wall == World.Walls.SE
+            if (currentNode.wall == World.Walls.N || currentNode.wall == World.Walls.NE
+                || currentNode.wall == World.Walls.NW || currentNode.wall == World.Walls.E
+                || currentNode.wall == World.Walls.SE
                 || neighbour.wall == World.Walls.S || neighbour.wall == World.Walls.W
                 || neighbour.wall == World.Walls.SE || neighbour.wall == World.Walls.SW
                 || neighbour.wall == World.Walls.NW)
@@ -221,9 +223,9 @@ public class Pathfinding
         }
         else if (difference.x < 0 && difference.y > 0) // NW
         {
-            if (currentTile.wall == World.Walls.N || currentTile.wall == World.Walls.NE
-                || currentTile.wall == World.Walls.NW || currentTile.wall == World.Walls.W
-                || currentTile.wall == World.Walls.SW
+            if (currentNode.wall == World.Walls.N || currentNode.wall == World.Walls.NE
+                || currentNode.wall == World.Walls.NW || currentNode.wall == World.Walls.W
+                || currentNode.wall == World.Walls.SW
                 || neighbour.wall == World.Walls.S || neighbour.wall == World.Walls.E
                 || neighbour.wall == World.Walls.SE || neighbour.wall == World.Walls.SW
                 || neighbour.wall == World.Walls.NE)
@@ -231,9 +233,9 @@ public class Pathfinding
         }
         else if (difference.x > 0 && difference.y < 0) // SE
         {
-            if (currentTile.wall == World.Walls.S || currentTile.wall == World.Walls.SE
-                || currentTile.wall == World.Walls.SW || currentTile.wall == World.Walls.E
-                || currentTile.wall == World.Walls.NE
+            if (currentNode.wall == World.Walls.S || currentNode.wall == World.Walls.SE
+                || currentNode.wall == World.Walls.SW || currentNode.wall == World.Walls.E
+                || currentNode.wall == World.Walls.NE
                 || neighbour.wall == World.Walls.N || neighbour.wall == World.Walls.W
                 || neighbour.wall == World.Walls.NE || neighbour.wall == World.Walls.NW
                 || neighbour.wall == World.Walls.SW)
@@ -241,9 +243,9 @@ public class Pathfinding
         }
         else if (difference.x < 0 && difference.y < 0) // SW
         {
-            if (currentTile.wall == World.Walls.S || currentTile.wall == World.Walls.SE
-                || currentTile.wall == World.Walls.SW || currentTile.wall == World.Walls.W
-                || currentTile.wall == World.Walls.NW
+            if (currentNode.wall == World.Walls.S || currentNode.wall == World.Walls.SE
+                || currentNode.wall == World.Walls.SW || currentNode.wall == World.Walls.W
+                || currentNode.wall == World.Walls.NW
                 || neighbour.wall == World.Walls.N || neighbour.wall == World.Walls.E
                 || neighbour.wall == World.Walls.NE || neighbour.wall == World.Walls.NW
                 || neighbour.wall == World.Walls.SE)

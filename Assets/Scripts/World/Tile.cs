@@ -2,30 +2,24 @@
 
 public class Tile
 {
-    public Vector2Int pos { get; private set; }
+    //public Vector2Int pos { get; private set; }
+    public int x { get; private set; }
+    public float y { get; private set; }
+    public int z { get; private set; }
     public bool canWalk { get; set; }
     public World.Walls wall { get; set; }
-
-    // pathfinding
-    public int gCost { get; set; } // walking cost from start tile
-    public int hCost { get; set; } // approximate cost to end tile
-    public int fCost { get; set; } // gCost + hCost
-    public Tile previous { get; set; } // used in final path
 
     public Tile()
     {
         
     }
 
-    public Tile(Vector2Int _pos)
+    public Tile(int _x, float _y, int _z)
     {
-        pos = _pos;
+        x = _x;
+        y = _y;
+        z = _z;
         canWalk = true;
         wall = World.Walls.X;
-    }
-
-    public void calculateFCost()
-    {
-        fCost = gCost + hCost;
     }
 }

@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 1000, ~excludeMask)) // if raycast is successfull
             {
-                pathList = Pathfinding.Instance.FindVectorPath(SnapToGrid(transform.position), SnapToGrid(hit.point));
+                pathList = pathfinding.FindVectorPath(SnapToGrid(transform.position), SnapToGrid(hit.point));
                 pathIndex = 0;
 
                 Interactable interactable = hit.collider.GetComponent<Interactable>();

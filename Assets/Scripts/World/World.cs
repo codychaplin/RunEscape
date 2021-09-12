@@ -11,7 +11,7 @@ public class World : MonoBehaviour
     public Transform obstacles;
 
     public static readonly int ChunkWidth = 16;
-    public static readonly int WorldSizeInChunks = 6;
+    public static readonly int WorldSizeInChunks = 7;
 
     static readonly int ViewDistance = 2;
 
@@ -57,10 +57,9 @@ public class World : MonoBehaviour
     {
         for (int i = 0; i < tileMap.GetLength(0); i++)
             for (int j = 0; j < tileMap.GetLength(1); j++)
-                tileMap[i, j] = new Tile(new Vector2Int(i, j)); // initializes tileMap
+                tileMap[i, j] = new Tile(i, 0f, j); // initializes tileMap
 
         Transform chunksParent = transform.GetChild(0).GetChild(0); // gets Chunks group
-        Transform obstaclesParent = transform.GetChild(0).GetChild(1); // gets Obstacles group
         List<Transform> chunkList = new List<Transform>(); // creates list
 
         foreach (Transform child in chunksParent) // foreach child in parent
@@ -87,7 +86,7 @@ public class World : MonoBehaviour
         else
             Debug.Log("Chunks list/array not same size");
 
-        int length = obstaclesParent.childCount;
+        /*int length = obstaclesParent.childCount;
         for (int i = 0; i < length; i++)
         {
             Chunk chunk = GetChunk(obstaclesParent.GetChild(0).position);
@@ -96,7 +95,7 @@ public class World : MonoBehaviour
         }
 
         if (obstaclesParent.childCount > 0)
-            Debug.Log("Not all children moved under chunk");
+            Debug.Log("Not all children moved under chunk");*/
     }
 
     void GetObstacles()
@@ -156,9 +155,9 @@ public class World : MonoBehaviour
         return tileMap[x, z];
     }
 
-    bool IsInWorld(Vector3 pos)
+    public static bool IsInWorld(Vector2Int pos)
     {
-        if (pos.x >= 0 && pos.x < WorldSizeInTiles && pos.z >= 0 && pos.z < WorldSizeInTiles)
+        if (pos.x >= 0 && pos.x < WorldSizeInTiles && pos.y >= 0 && pos.y < WorldSizeInTiles)
             return true;
         else
             return false;
@@ -166,7 +165,7 @@ public class World : MonoBehaviour
 
     Chunk GetChunk(Vector3 pos)
     {
-        if (IsInWorld(pos))
+        if (IsInWorld(new Vector2Int((int)pos.x, (int)pos.z)))
         {
             int x = Mathf.Abs(Mathf.FloorToInt(pos.x / ChunkWidth));
             int z = Mathf.Abs(Mathf.FloorToInt(pos.z / ChunkWidth));
