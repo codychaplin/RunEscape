@@ -20,6 +20,6 @@ public class Tile
         y = _y;
         z = _z;
         canWalk = true;
-        wall = World.Walls.X;
+        wall = World.Walls.O;
     }
 }

@@ -4,10 +4,10 @@ public class Obstacle : MonoBehaviour
 {
     new public string name = "New Obstacle";
     public string examineText = "A new obstacle";
-    public int xSize = 10;
-    public int zSize = 10;
+    public int xSize = 1;
+    public int zSize = 1;
     [TextArea(13, 5)]
-    public string shape;
+    public string shape = "X";
 
     public World.Walls[,] walls;
 

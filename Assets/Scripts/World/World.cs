@@ -8,14 +8,14 @@ public class World : MonoBehaviour
     public Transform player;
     public Material material;
     public GameObject fog;
-    public Transform obstacles;
+    public Transform chunksParent;
 
     public static readonly int ChunkWidth = 16;
     public static readonly int WorldSizeInChunks = 7;
 
     static readonly int ViewDistance = 2;
 
-    public enum Walls { X, N, E, W, S, NE, NW, SE, SW };
+    public enum Walls { O, X, N, E, W, S, NE, NW, SE, SW };
 
     // used to get the world size in tiles, given size of world in chunks
     public static int WorldSizeInTiles
@@ -100,22 +100,35 @@ public class World : MonoBehaviour
 
     void GetObstacles()
     {
-        foreach (Transform child in obstacles)
-        {
-            Obstacle obstacle = child.GetComponent<Obstacle>();
-            if (obstacle != null)
-            {
-                int x = Mathf.FloorToInt(obstacle.transform.position.x);
-                int z = Mathf.FloorToInt(obstacle.transform.position.z);
+        foreach (Transform chunk in chunksParent)
+            if (chunk.childCount > 0)
+                foreach (Transform child in chunk)
+                {
+                    if (child.tag == "Water")
+                        continue;
 
-                for (int i = x, ix = 0; i < x + obstacle.xSize; i++, ix++)
-                    for (int j = z, jz = 0; j < z + obstacle.zSize; j++, jz++)
-                        if (obstacle.walls[ix, jz] != Walls.X)
-                            tileMap[i, j].wall = obstacle.walls[ix, jz];
-            }
-            else
-                Debug.Log("no obstacle script");
-        }   
+                    Obstacle obstacle = child.GetComponent<Obstacle>();
+                    if (obstacle != null)
+                    {
+                        int x = Mathf.FloorToInt(obstacle.transform.position.x);
+                        int z = Mathf.FloorToInt(obstacle.transform.position.z);
+
+                        if (obstacle.xSize == 1 && obstacle.zSize == 1)
+                        {
+                            tileMap[x, z].wall = World.Walls.X;
+                            tileMap[x, z].canWalk = false;
+                        }
+                        else
+                        {
+                            for (int i = x, ix = 0; i < x + obstacle.xSize; i++, ix++)
+                                for (int j = z, jz = 0; j < z + obstacle.zSize; j++, jz++)
+                                    if (obstacle.walls[ix, jz] != Walls.O)
+                                        tileMap[i, j].wall = obstacle.walls[ix, jz];
+                        }
+                    }
+                    else
+                        Debug.Log("no obstacle script on " + child.name);
+                } 
     }
 
     void CheckViewDistance()

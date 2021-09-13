@@ -49,6 +49,16 @@ public class Pathfinding
             return null;
         }
 
+        if (!World.tileMap[endX, endZ].canWalk)
+        {
+            int xDiff = Mathf.Abs(startX - endX);
+            int zDiff = Mathf.Abs(startZ - endZ);
+            if (xDiff > zDiff)
+                endX = (startX < endX) ? endX - 1 : endX + 1;
+            else
+                endZ = (startZ < endZ) ? endZ - 1 : endZ + 1;
+        }
+
         // initializes nodeMap for pathfinding
         for (int x = Mathf.Max(0, startX - MAX_DISTANCE); x < Mathf.Min(startX + MAX_DISTANCE, World.WorldSizeInTiles); x++)
             for (int z = Mathf.Max(0, startZ - MAX_DISTANCE); z < Mathf.Min(startZ + MAX_DISTANCE, World.WorldSizeInTiles); z++)
@@ -94,8 +104,8 @@ public class Pathfinding
                     // if there is an obstacle between a diagonal neighbour, skip
                     if (!nodeMap[currentNode.x + difference.x, currentNode.z].canWalk // (x + difference.x, y)
                         || !nodeMap[currentNode.x, currentNode.z + difference.y].canWalk // (x, y + difference.y)
-                        || nodeMap[currentNode.x + difference.x, currentNode.z].wall != World.Walls.X
-                        || nodeMap[currentNode.x, currentNode.z + difference.y].wall != World.Walls.X)
+                        || nodeMap[currentNode.x + difference.x, currentNode.z].wall != World.Walls.O
+                        || nodeMap[currentNode.x, currentNode.z + difference.y].wall != World.Walls.O)
                         continue;
                 }
                 

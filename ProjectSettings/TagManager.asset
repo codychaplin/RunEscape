@@ -9,6 +9,7 @@ TagManager:
   - Chunk
   - Obstacle
   - Canvas
+  - Water
   layers:
   - Default
   - TransparentFX
