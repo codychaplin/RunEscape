@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.IO;
 using System.Collections.Generic;
 
 public class World : MonoBehaviour
@@ -9,6 +8,7 @@ public class World : MonoBehaviour
     public Material material;
     public GameObject fog;
     public Transform chunksParent;
+    public Canvas canvas;
 
     public static readonly int ChunkWidth = 16;
     public static readonly int WorldSizeInChunks = 7;
@@ -16,6 +16,8 @@ public class World : MonoBehaviour
     static readonly int ViewDistance = 2;
 
     public enum Walls { O, X, N, E, W, S, NE, NW, SE, SW };
+
+    public static string playerName { get { return "Cevarus"; } }
 
     // used to get the world size in tiles, given size of world in chunks
     public static int WorldSizeInTiles
@@ -35,6 +37,8 @@ public class World : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        canvas.gameObject.SetActive(true);
+
         InitWorld(); // initialize tileMap and chunks
         GetObstacles(); // get unwalkable positions
 
@@ -46,11 +50,19 @@ public class World : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+            canvas.gameObject.SetActive(!canvas.gameObject.activeSelf);
+
         fog.transform.position = player.position; // fog follows player
 
         playerChunkPos = GetChunk(player.position); // update player chunk position
         if (playerChunkPos != lastPlayerChunkPos) // if on different chunk
             CheckViewDistance();
+    }
+
+    private void FixedUpdate()
+    {
+        //Debug.Log(Time.time);
     }
 
     void InitWorld()
