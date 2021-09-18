@@ -3,8 +3,8 @@ import bpy
 name = "Shrinkwrap"
 #WestBeach
 #SouthBeach
-targetName = "SouthBeach"
-vGroup = False
+targetName = "path"
+vGroup = True
 for obj in bpy.context.selected_objects:
     if name in obj.modifiers:
         mod = obj.modifiers[name]
@@ -16,4 +16,4 @@ for obj in bpy.context.selected_objects:
     mod.use_project_z = True
     mod.target = bpy.data.objects[targetName]
     if vGroup:
-        mod.vertex_group = obj.vertex_groups['land'].name
+        mod.vertex_group = obj.vertex_groups['grass'].name

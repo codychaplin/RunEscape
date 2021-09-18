@@ -10,26 +10,32 @@ public class World : MonoBehaviour
     public Transform chunksParent;
     public Canvas canvas;
 
-    public static readonly int ChunkWidth = 16;
-    public static readonly int WorldSizeInChunks = 7;
+    public static readonly int ChunkWidth = 32;
+    public static readonly int WorldSizeInChunksX = 4;
+    public static readonly int WorldSizeInChunksZ = 4;
 
-    static readonly int ViewDistance = 2;
+    static readonly int ViewDistance = 1;
 
     public enum Walls { O, X, N, E, W, S, NE, NW, SE, SW };
 
     public static string playerName { get { return "Cevarus"; } }
 
     // used to get the world size in tiles, given size of world in chunks
-    public static int WorldSizeInTiles
+    public static int WorldSizeX
     {
-        get { return WorldSizeInChunks * ChunkWidth; }
+        get { return WorldSizeInChunksX * ChunkWidth; }
+    }
+
+    public static int WorldSizeZ
+    {
+        get { return WorldSizeInChunksZ * ChunkWidth; }
     }
 
     // stores tiles (globally)
-    public static Tile[,] tileMap = new Tile[WorldSizeInTiles, WorldSizeInTiles];
+    public static Tile[,] tileMap = new Tile[WorldSizeX, WorldSizeZ];
 
     // array of chunks in game
-    Chunk[,] chunks = new Chunk[WorldSizeInChunks, WorldSizeInChunks];
+    Chunk[,] chunks = new Chunk[WorldSizeInChunksX, WorldSizeInChunksZ];
     List<Chunk> activeChunks = new List<Chunk>();
     Chunk playerChunkPos;
     Chunk lastPlayerChunkPos;
@@ -50,10 +56,17 @@ public class World : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!ChatBox.instance.input.isFocused && Input.GetKeyDown(KeyCode.Space))
             canvas.gameObject.SetActive(!canvas.gameObject.activeSelf);
 
-        fog.transform.position = player.position; // fog follows player
+        if (player.position.x <= 25 && player.position.z <= 25)
+            fog.transform.position = new Vector3(25f, 0f, 25f);
+        else if (player.position.x <= 25 && player.position.z > 25)
+            fog.transform.position = new Vector3(25f, 0f, player.position.z);
+        else if (player.position.x > 25 && player.position.z <= 25)
+            fog.transform.position = new Vector3(player.position.x, 0f, 25f);
+        else
+            fog.transform.position = player.position; // fog follows player
 
         playerChunkPos = GetChunk(player.position); // update player chunk position
         if (playerChunkPos != lastPlayerChunkPos) // if on different chunk
@@ -116,7 +129,7 @@ public class World : MonoBehaviour
             if (chunk.childCount > 0)
                 foreach (Transform child in chunk)
                 {
-                    if (child.tag == "Water")
+                    if (child.tag == "Solid")
                         continue;
 
                     Obstacle obstacle = child.GetComponent<Obstacle>();
@@ -124,6 +137,9 @@ public class World : MonoBehaviour
                     {
                         int x = Mathf.FloorToInt(obstacle.transform.position.x);
                         int z = Mathf.FloorToInt(obstacle.transform.position.z);
+
+                        if (obstacle.obj != null)
+                            tileMap[x, z].obj = obstacle.obj;
 
                         if (obstacle.xSize == 1 && obstacle.zSize == 1)
                         {
@@ -134,8 +150,12 @@ public class World : MonoBehaviour
                         {
                             for (int i = x, ix = 0; i < x + obstacle.xSize; i++, ix++)
                                 for (int j = z, jz = 0; j < z + obstacle.zSize; j++, jz++)
+                                {
                                     if (obstacle.walls[ix, jz] != Walls.O)
                                         tileMap[i, j].wall = obstacle.walls[ix, jz];
+                                    if (obstacle.walls[ix, jz] == Walls.X)
+                                        tileMap[i, j].canWalk = false;
+                                }
                         }
                     }
                     else
@@ -153,8 +173,8 @@ public class World : MonoBehaviour
             List<Chunk> previouslyActiveChunks = new List<Chunk>(activeChunks);
             activeChunks.Clear();
 
-            for (int i = Mathf.Max(0, chunkPos.x - ViewDistance); i <= Mathf.Min(WorldSizeInChunks - 1, chunkPos.x + ViewDistance); i++)
-                for (int j = Mathf.Max(0, chunkPos.z - ViewDistance); j <= Mathf.Min(WorldSizeInChunks - 1, chunkPos.z + ViewDistance); j++)
+            for (int i = Mathf.Max(0, chunkPos.x - ViewDistance); i <= Mathf.Min(WorldSizeInChunksX - 1, chunkPos.x + ViewDistance); i++)
+                for (int j = Mathf.Max(0, chunkPos.z - ViewDistance); j <= Mathf.Min(WorldSizeInChunksZ - 1, chunkPos.z + ViewDistance); j++)
                 {
                     Chunk thisChunk = chunks[i, j];
                     if (thisChunk != null)
@@ -182,7 +202,7 @@ public class World : MonoBehaviour
 
     public static bool IsInWorld(Vector2Int pos)
     {
-        if (pos.x >= 0 && pos.x < WorldSizeInTiles && pos.y >= 0 && pos.y < WorldSizeInTiles)
+        if (pos.x >= 0 && pos.x < WorldSizeX && pos.y >= 0 && pos.y < WorldSizeZ)
             return true;
         else
             return false;

@@ -3,6 +3,7 @@
 public class Obstacle : MonoBehaviour
 {
     public ObstacleObject obj;
+    public bool canWalkOver = false;
     public int xSize = 1;
     public int zSize = 1;
     [TextArea(13, 5)]
@@ -10,7 +11,7 @@ public class Obstacle : MonoBehaviour
 
     public World.Walls[,] walls;
 
-    private void Start()
+    private void Awake()
     {
         walls = new World.Walls[xSize, zSize];
         ConvertToEnum(); // converts string shape to enum values in array
@@ -18,13 +19,21 @@ public class Obstacle : MonoBehaviour
 
     void ConvertToEnum()
     {
-        string[] rows = shape.Split('.');
-
-        for (int x = 0; x < rows.Length; x++)
+        if (shape == "")
         {
-            string[] column = rows[x].Split(',');
-            for (int z = 0; z < column.Length; z++)
-                walls[x, z] = (World.Walls)System.Enum.Parse(typeof(World.Walls), column[z]);
+            for (int x = 0; x < xSize; x++)
+                for (int z = 0; z < zSize; z++)
+                    walls[x, z] = World.Walls.X;
+        }
+        else
+        {
+            string[] rows = shape.Split('.');
+            for (int x = 0; x < rows.Length; x++)
+            {
+                string[] column = rows[x].Split(',');
+                for (int z = 0; z < column.Length; z++)
+                    walls[x, z] = (World.Walls)System.Enum.Parse(typeof(World.Walls), column[z]);
+            }
         }
     }
 }

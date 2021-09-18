@@ -4,6 +4,15 @@ using UnityEngine.UI;
 
 public class ChatBox : MonoBehaviour
 {
+    #region Singleton
+    public static ChatBox instance;
+
+    void Awake()
+    {
+        instance = this;
+    }
+    #endregion
+
     public GameObject textPanel;
     public GameObject textPrefab;
     public InputField input;
@@ -26,20 +35,21 @@ public class ChatBox : MonoBehaviour
 
         if (input.text != "" && Input.GetKeyDown(KeyCode.Return))
         {
-            AddMessage(input.text);
+            AddMessage(input.text, true);
             input.text = "";
         }
     }
 
-    void AddMessage(string text)
+    public void AddMessage(string text, bool fromPlayer)
     {
-        text = World.playerName + ": " + text;
-
         if (messages.Count >= MAX)
         {
             Destroy(messages[0].textObject.gameObject);
             messages.RemoveAt(0);
         }
+
+        if (fromPlayer)
+            text = World.playerName + ": " + text;
 
         Message newMessage = new Message();
         newMessage.text = text;
@@ -47,6 +57,9 @@ public class ChatBox : MonoBehaviour
         GameObject newText = Instantiate(textPrefab, textPanel.transform);
         newMessage.textObject = newText.GetComponent<Text>();
         newMessage.textObject.text = newMessage.text;
+
+        if (!fromPlayer)
+            newMessage.textObject.color = Color.yellow;
 
         messages.Add(newMessage);
     }

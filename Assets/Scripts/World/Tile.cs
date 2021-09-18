@@ -2,12 +2,12 @@
 
 public class Tile
 {
-    //public Vector2Int pos { get; private set; }
     public int x { get; private set; }
     public float y { get; private set; }
     public int z { get; private set; }
     public bool canWalk { get; set; }
     public World.Walls wall { get; set; }
+    public ObstacleObject obj { get; set; }
 
     public Tile()
     {
@@ -21,5 +21,6 @@ public class Tile
         z = _z;
         canWalk = true;
         wall = World.Walls.O;
+        obj = null;
     }
 }

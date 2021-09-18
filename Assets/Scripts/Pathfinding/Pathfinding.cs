@@ -10,7 +10,7 @@ public class Pathfinding
     const int DIAGONAL_COST = 14; // square root of 2 * 10
     const int MAX_DISTANCE = 30; // max distance to search for endNode
 
-    Node[,] nodeMap = new Node[World.WorldSizeInTiles, World.WorldSizeInTiles];
+    Node[,] nodeMap = new Node[World.WorldSizeX, World.WorldSizeZ];
     
     public Pathfinding()
     {
@@ -59,9 +59,14 @@ public class Pathfinding
                 endZ = (startZ < endZ) ? endZ - 1 : endZ + 1;
         }
 
+        int minX = Mathf.Max(0, startX - MAX_DISTANCE);
+        int maxX = Mathf.Min(startX + MAX_DISTANCE, World.WorldSizeX);
+        int minZ = Mathf.Max(0, startZ - MAX_DISTANCE);
+        int maxZ = Mathf.Min(startZ + MAX_DISTANCE, World.WorldSizeZ);
+
         // initializes nodeMap for pathfinding
-        for (int x = Mathf.Max(0, startX - MAX_DISTANCE); x < Mathf.Min(startX + MAX_DISTANCE, World.WorldSizeInTiles); x++)
-            for (int z = Mathf.Max(0, startZ - MAX_DISTANCE); z < Mathf.Min(startZ + MAX_DISTANCE, World.WorldSizeInTiles); z++)
+        for (int x = minX; x < maxX; x++)
+            for (int z = minZ; z < maxZ; z++)
                 nodeMap[x, z] = new Node(x, 0f, z, World.tileMap[x, z].canWalk, World.tileMap[x, z].wall);
 
         Node startNode = nodeMap[startX, startZ];
@@ -85,7 +90,7 @@ public class Pathfinding
             openList.Remove(currentNode);
             closedList.Add(currentNode);
 
-            foreach (Node neighbour in GetNeighbours(currentNode))
+            foreach (Node neighbour in GetNeighbours(currentNode, minX, maxX, minZ, maxZ))
             {
                 // if statements check if neighbour is valid
                 if (closedList.Contains(neighbour)) continue; // if already checked
@@ -161,31 +166,31 @@ public class Pathfinding
         return lowest;
     }
 
-    List<Node> GetNeighbours(Node currentNode)
+    List<Node> GetNeighbours(Node currentNode, int minX, int maxX, int minZ, int maxZ)
     {
         List<Node> neighbourList = new List<Node>();
 
-        if (currentNode.x - 1 >= 0)
+        if (currentNode.x - 1 >= minX)
         {
             neighbourList.Add(nodeMap[currentNode.x - 1, currentNode.z]); // left
-            if (currentNode.z - 1 >= 0)
+            if (currentNode.z - 1 >= minZ)
                 neighbourList.Add(nodeMap[currentNode.x - 1, currentNode.z - 1]); // left down
-            if (currentNode.z + 1 < World.WorldSizeInTiles)
+            if (currentNode.z + 1 < maxZ)
                 neighbourList.Add(nodeMap[currentNode.x - 1, currentNode.z + 1]);// left up
         }
 
-        if (currentNode.x + 1 < World.WorldSizeInTiles)
+        if (currentNode.x + 1 < maxX)
         {
             neighbourList.Add(nodeMap[currentNode.x + 1, currentNode.z]); // right
-            if (currentNode.z - 1 >= 0)
+            if (currentNode.z - 1 >= minZ)
                 neighbourList.Add(nodeMap[currentNode.x + 1, currentNode.z - 1]); // right down
-            if (currentNode.z + 1 < World.WorldSizeInTiles)
+            if (currentNode.z + 1 < maxZ)
                 neighbourList.Add(nodeMap[currentNode.x + 1, currentNode.z + 1]); // right up
         }
 
-        if (currentNode.z - 1 >= 0)
+        if (currentNode.z - 1 >= minZ)
             neighbourList.Add(nodeMap[currentNode.x, currentNode.z - 1]); // down
-        if (currentNode.z + 1 < World.WorldSizeInTiles)
+        if (currentNode.z + 1 < maxZ)
             neighbourList.Add(nodeMap[currentNode.x, currentNode.z + 1]); // up
 
         return neighbourList;

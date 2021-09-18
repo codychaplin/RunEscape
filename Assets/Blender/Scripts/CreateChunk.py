@@ -1,6 +1,7 @@
 import bpy
 
-size = 16*7+1 # grid is 16x16 but n+1 vertices is needed
+size = 17
+ # grid is 16x16 but n+1 vertices is needed
 
 def vert(x, y):
     return (x, y, 0)

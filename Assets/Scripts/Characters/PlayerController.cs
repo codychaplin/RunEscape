@@ -41,14 +41,22 @@ public class PlayerController : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 1000, ~excludeMask)) // if raycast is successfull
             {
-                pathList = pathfinding.FindVectorPath(SnapToGrid(transform.position), SnapToGrid(hit.point));
-                pathIndex = 0;
+                if (hit.collider.tag != "Solid")
+                {
+                    Vector3 pos = hit.point;
+                    if (hit.collider.gameObject.TryGetComponent<Obstacle>(out Obstacle obstacle))
+                        if (!obstacle.canWalkOver)
+                            pos = hit.collider.gameObject.transform.position;
 
-                Interactable interactable = hit.collider.GetComponent<Interactable>();
-                if (interactable != null)
-                    SetFocus(interactable); // if focus is interactable, set focus
-                else
-                    RemoveFocus(); // remove focus, if any
+                    pathList = pathfinding.FindVectorPath(SnapToGrid(transform.position), SnapToGrid(pos));
+                    pathIndex = 0;
+
+                    Interactable interactable = hit.collider.GetComponent<Interactable>();
+                    if (interactable != null)
+                        SetFocus(interactable); // if focus is interactable, set focus
+                    else
+                        RemoveFocus(); // remove focus, if any
+                }
             }
         }
 
@@ -59,7 +67,9 @@ public class PlayerController : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, 1000, ~excludeMask))
             {
-                
+                if (hit.collider.gameObject.TryGetComponent<Obstacle>( out Obstacle obstacle))
+                    if (obstacle.obj != null)
+                        ChatBox.instance.AddMessage(obstacle.obj.examineText, false);
             }
         }
 
@@ -70,28 +80,29 @@ public class PlayerController : MonoBehaviour
     void Movement()
     {
         if (pathList != null)
-        {
-            Vector3 targetPosition = new Vector3(pathList[pathIndex].x, transform.position.y, pathList[pathIndex].y);
-            if (Vector3.Distance(transform.position, targetPosition) > 0.1f) // if not near target, move towards
+            if (pathList.Count > 0)
             {
-                FollowTarget(targetPosition); // follows target
-                if (target == null)
-                    FaceTarget(targetPosition); // faces target
-            }
-            else // if near, increment to next target in list
-            {
-                pathIndex++;
-                if (pathIndex >= pathList.Count) // if end, stop
+                Vector3 targetPosition = new Vector3(pathList[pathIndex].x, transform.position.y, pathList[pathIndex].y);
+                if (Vector3.Distance(transform.position, targetPosition) > 0.1f) // if not near target, move towards
                 {
-                    pathList = null;
-                    transform.position = SnapToCenter(transform.position);
+                    FollowTarget(targetPosition); // follows target
+                    if (target == null)
+                        FaceTarget(targetPosition); // faces target
                 }
-            }
+                else // if near, increment to next target in list
+                {
+                    pathIndex++;
+                    if (pathIndex >= pathList.Count) // if end, stop
+                    {
+                        pathList = null;
+                        transform.position = SnapToCenter(transform.position);
+                    }
+                }
 
-            // snaps player to ground level
-            if (Physics.Raycast(groundCheck.position, Vector3.down, out RaycastHit hit, 10, groundMask))
-                transform.position = new Vector3(transform.position.x, hit.point.y, transform.position.z);
-        }
+                // snaps player to ground level
+                if (Physics.Raycast(groundCheck.position, Vector3.down, out RaycastHit hit, 10, groundMask))
+                    transform.position = new Vector3(transform.position.x, hit.point.y, transform.position.z);
+            }
     }
 
     /*void ShowPath(List<Vector3> path)
