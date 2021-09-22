@@ -10,9 +10,9 @@ public class World : MonoBehaviour
     public Transform chunksParent;
     public Canvas canvas;
 
-    public static readonly int ChunkWidth = 32;
-    public static readonly int WorldSizeInChunksX = 4;
-    public static readonly int WorldSizeInChunksZ = 4;
+    public static readonly int ChunkWidth = 128;
+    public static readonly int WorldSizeInChunksX = 2;
+    public static readonly int WorldSizeInChunksZ = 2;
 
     static readonly int ViewDistance = 1;
 
@@ -129,7 +129,7 @@ public class World : MonoBehaviour
             if (chunk.childCount > 0)
                 foreach (Transform child in chunk)
                 {
-                    if (child.tag == "Solid")
+                    if (child.tag == "Environment")
                         continue;
 
                     Obstacle obstacle = child.GetComponent<Obstacle>();

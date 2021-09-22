@@ -9,7 +9,7 @@ TagManager:
   - Chunk
   - Obstacle
   - Canvas
-  - Solid
+  - Environment
   layers:
   - Default
   - TransparentFX
