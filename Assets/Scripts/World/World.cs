@@ -18,7 +18,7 @@ public class World : MonoBehaviour
 
     public enum Walls { O, X, N, E, W, S, NE, NW, SE, SW };
 
-    public static string playerName { get { return "Cevarus"; } }
+    public static string playerName { get { return "Cody"; } }
 
     // used to get the world size in tiles, given size of world in chunks
     public static int WorldSizeX
@@ -218,5 +218,10 @@ public class World : MonoBehaviour
         }
         else
             return null;
+    }
+
+    public static int XPFormula(float x)
+    {
+        return Mathf.FloorToInt(0.25f * (x - 1 + 800 * (Mathf.Pow(2f, (x - 1f) / 8f))));
     }
 }
